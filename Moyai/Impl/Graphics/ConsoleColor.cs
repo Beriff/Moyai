@@ -25,5 +25,10 @@
 		}
 
 		public static ConsoleColor Default { get => OnlyFg((255, 255, 255)); }
+
+		public static implicit operator ConsoleColor((int, int, int) a)
+		{
+			return new(((byte)a.Item1, (byte)a.Item2, (byte)a.Item3));
+		}
 	}
 }

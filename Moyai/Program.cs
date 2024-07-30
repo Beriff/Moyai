@@ -1,6 +1,7 @@
 ﻿using Moyai.Abstract;
 using Moyai.Impl.Graphics;
 using Moyai.Impl.Graphics.Widgets;
+using Moyai.Impl.Input;
 using Moyai.Impl.Math;
 
 namespace Moyai
@@ -12,35 +13,27 @@ namespace Moyai
 		public ExampleApp() : base()
 		{
 			MainBuf = new(new(30));
-			Frame = new(
-				Symbol.Text("Shrimple frame", new Impl.ConsoleColor((255,255,255), (0,0,0))),
-				new('▓', new((255,255,255))),
-				new(20, 10));
-
-			for (int a = 0; a < 30; a++)
-			{
-				for (int b = 0; b < 30; b++)
-				{
-					var col = ((byte)255, (byte)(255 * a / 30f), (byte)(255 * b / 30f));
-					MainBuf[a, b] = new(
-						'▓',
-						new(col, col)
-						);
-				}
-			}
 		}
 		public override void Render()
 		{
 			MainBuf.Clear();
 
-			Frame.Draw(MainBuf);
+			MainBuf.BlitSymbString(
+				Symbol.Text($"{InputHandler.MousePos(MainBuf)}"),
+				Vec2.Zero
+				);
 
+			// Draw FPS
 			{
 				var text = Symbol.Text(
 					$"{1 / TimeDelta} FPS",
 					Impl.ConsoleColor.OnlyFg((255, 255, 255)));
 				MainBuf.BlitSymbString(text, new(0, 11));
 			}
+
+			var pos = InputHandler.MousePos(MainBuf);
+			if(pos.X < 0) { throw new Exception("WHAT"); }
+			MainBuf[pos.X, pos.Y] = new Symbol('▓', new((255, 255, 255)));
 
 			MainBuf.Render();
 			base.Render();

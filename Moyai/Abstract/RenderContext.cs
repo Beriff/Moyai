@@ -1,4 +1,6 @@
 ﻿using Moyai.Impl;
+using Moyai.Impl.Input;
+using Moyai.Impl.Math;
 
 namespace Moyai.Abstract
 {
@@ -12,6 +14,8 @@ namespace Moyai.Abstract
 			//Calculate time delta
 			TimeDelta = (DateTime.Now - PrevTimestamp).TotalSeconds;
             PrevTimestamp = DateTime.Now;
+
+            InputHandler.Update();
         }
 
         protected RenderContext()
