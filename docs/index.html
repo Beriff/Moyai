@@ -5,6 +5,9 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
 <body>
+    <button id="darkmode">dark mode</button>
+    <hr>
+
     <marquee>Latest Moyai version: 0.1a</marquee>
     <center><img src="logo.png"></center>
     <hr>
@@ -15,12 +18,40 @@
         Moyai is also a suite of apps to help you develop your games and an interpreter for "moscript", a scripting language designed to be used within
         moyai applications
     </p>
+    <p>
+        Moyai consists of <code>Moyai Framework</code>, a C# framework, that everything else is built on,
+        <code>Moyai Engine</code>, a game engine built with moyai framework, capable of running .moproj files and <code>Moyai Editor</code>, a .moproj editor
+        which itself is built with the use of moyai framework.
+    </p><p>
+        To develop games, you can use <code>Moyai Engine</code>, with the help of the editor, or use the framework directly (which does not implement
+        some features, most notably, the ability to execute .moproj files, but gives more room for optimisation and implementation of additional features)
+    </p>
     Roadmap:
     <ul>
         <li><s>GUI rendering</s></li>
-        <li>Input Handling</li>
-        <li>Raytraced rendering</li>
+        <li><s>Input Handling</s></li>
+        <li>Raytraced rendering (in progress)</li>
+        <li>Event System</li>
+        <li>ECS Game Engine System</li>
+        <li>MoScript Interpreter</li>
+        <li>Moyai Engine & Moyai Editor</li>
     </ul>
 
+    <hr>
+    <h4>Where do i go now?</h4>
+    <ul>
+        <li><a>Moyai Framework Reference</a></li>
+        <li><a>Moyai Engine / Editor Reference</a></li>
+        <li><a>MoScript Reference</a></li>
+    </ul>
+    <hr>
+    <center><sub>Made with pure bloody html and ❤️ by Beriff</sub></center>
+    <script>
+        document.getElementById('darkmode').onclick = () => {
+            let $=document.body.style; 
+            $.backgroundColor = $.backgroundColor == 'black' ? 'white' : 'black'; 
+            $.color =  $.color == 'white' ? 'black' : 'white';
+        }
+    </script>
 </body>
 </html>
