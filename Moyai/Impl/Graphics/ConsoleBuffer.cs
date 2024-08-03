@@ -28,9 +28,9 @@ namespace Moyai.Impl.Graphics
 
         public void Blit(ConsoleBuffer accepting, Vec2 pos)
         {
-            for (int y = 0; y <= Size.Y; y++)
+            for (int y = 0; y < Size.Y; y++)
             {
-                for (int x = 0; x <= Size.X; x++)
+                for (int x = 0; x < Size.X; x++)
                 {
                     if (
                         x + pos.X <= accepting.Size.X &&
@@ -77,13 +77,20 @@ namespace Moyai.Impl.Graphics
         public Symbol this[int x, int y]
         {
             get => Grid[x, y];
-            set => Grid[x, y] = value;
+            set
+            {
+                if (x >= 0 && x < Size.X && y >= 0 && y < Size.Y)
+                {
+                    Grid[x, y] = value;
+                }
+            }
         }
 
         public ConsoleBuffer(Vec2 size)
         {
             Size = size;
             Grid = new Symbol[size.X, size.Y];
+            Fill(new(' ', ConsoleColor.Default));
         }
     }
 }

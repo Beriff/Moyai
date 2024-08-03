@@ -22,10 +22,21 @@ namespace Moyai.Impl.Math
 			return new(start, start + new Vec2(size));
 		}
 
+		public bool Contains(Vec2 point)
+		{
+			return point.X >= Start.X && point.X <= End.X
+				&& point.Y >= Start.Y && point.Y <= End.Y;
+		}
+
 		public Rect(Vec2 start, Vec2 end)
 		{
 			Start = start;
 			End = end;
+		}
+
+		public override string ToString()
+		{
+			return $"{{{Start}|{End}}}";
 		}
 	}
 }

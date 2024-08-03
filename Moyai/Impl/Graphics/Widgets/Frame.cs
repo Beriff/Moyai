@@ -7,7 +7,7 @@ namespace Moyai.Impl.Graphics.Widgets
     public class Frame : ContainerWidget
     {
         public Symbol[] Label { get; set; }
-        public Symbol Border { get; set; }
+        public ConsoleColor Border { get; set; }
 
         public override void Draw(ConsoleBuffer buf)
         {
@@ -17,13 +17,43 @@ namespace Moyai.Impl.Graphics.Widgets
             {
                 for (int y = Position.Y; y < Position.Y + size.Y; y++)
                 {
-                    if (x == Position.X ||
-                        y == Position.Y ||
-                        x == Position.X + size.X - 1 ||
-                        y == Position.Y + size.Y - 1)
+                    if(x == Position.X)
                     {
-                        buf[x, y] = Border;
-                    }
+                        if (y == Position.Y)
+                        {
+							buf[x, y] = new Symbol('┌', Border);
+						}  
+                        else if (y == Position.Y + size.Y - 1)
+                        {
+							buf[x, y] = new Symbol('└', Border);
+						}  
+                        else
+                        {
+							buf[x, y] = new Symbol('│', Border);
+						}                        
+					}
+                    else if (x == Position.X + size.X - 1)
+                    {
+                        if (y == Position.Y)
+                        {
+							buf[x, y] = new Symbol('┐', Border);
+						}
+                        else if (y == Position.Y + size.Y - 1)
+                        {
+							buf[x, y] = new Symbol('┘', Border);
+						}
+                        else
+					    {
+							buf[x, y] = new Symbol('│', Border);
+						}
+					}
+                    else
+                    {
+						if (y == Position.Y || y == Position.Y + size.Y - 1)
+					    {
+							buf[x, y] = new Symbol('─', Border);
+						}
+					}
                 }
             }
 
@@ -36,7 +66,7 @@ namespace Moyai.Impl.Graphics.Widgets
             }
         }
 
-        public Frame(Symbol[] label, Symbol border, Vec2 size)
+        public Frame(Symbol[] label, ConsoleColor border, Vec2 size)
             : base(null, true, true, new(0), size, new(0))
         {
             Label = label;

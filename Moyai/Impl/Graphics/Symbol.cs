@@ -1,4 +1,6 @@
-﻿namespace Moyai.Impl.Graphics
+﻿using System.Text;
+
+namespace Moyai.Impl.Graphics
 {
     public struct Symbol
     {
@@ -20,7 +22,7 @@
             var symbols = new Symbol[text.Length];
             for (int i = 0; i < text.Length; i++)
             {
-                symbols[i] = new(text[i], color);
+                symbols[i] = new(text[i], (ConsoleColor)color);
             }
             return symbols;
         }
@@ -33,6 +35,13 @@
                 symbols[i] = new(text[i], f(i));
             }
             return symbols;
+        }
+
+        public static string StringFromText(Symbol[] text)
+        {
+            var str = new StringBuilder();
+            foreach(Symbol symbol in text) { str.Append(symbol.Character); }
+            return str.ToString();
         }
     }
 }

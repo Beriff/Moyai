@@ -33,6 +33,44 @@ namespace Moyai.Impl.Input
 		public int nFont;
 		public Coord dwFontSize;
 	}
+	[StructLayout(LayoutKind.Explicit)]
+	internal struct MOUSE_EVENT_RECORD
+	{
+		[FieldOffset(0)]
+		public Coord MousePosition;
+		[FieldOffset(4)]
+		public uint ButtonState;
+		[FieldOffset(8)]
+		public uint ControlKeyState;
+		[FieldOffset(12)]
+		public uint EventFlags;
+	}
+	[StructLayout(LayoutKind.Explicit)]
+	internal struct KEY_EVENT_RECORD
+	{
+		[FieldOffset(0)]
+		public bool KeyDown;
+		[FieldOffset(4)]
+		public ushort RepeatCount;
+		[FieldOffset(6)]
+		public ushort VirtualKeyCode;
+		[FieldOffset(8)]
+		public ushort VirtualScanCode;
+		[FieldOffset(10)]
+		public char UnicodeChar;
+		[FieldOffset(12)]
+		public int ControlKeyState;
+	}
+	[StructLayout(LayoutKind.Explicit)]
+	internal struct INPUT_RECORD
+	{
+		[FieldOffset(0)]
+		public ushort EventType;
+		[FieldOffset(4)]
+		public KEY_EVENT_RECORD KeyEvent;
+		[FieldOffset(4)]
+		public MOUSE_EVENT_RECORD MouseEvent;
+	}
 
 	public enum Keys
 	{
@@ -152,10 +190,18 @@ namespace Moyai.Impl.Input
 		static extern bool GetCurrentConsoleFont(IntPtr hConsoleOutput, bool bMaximumWindow, out CONSOLE_FONT_INFO lpConsoleCurrentFontInfo);
 		[DllImport("user32.dll")]
 		private static extern int GetSystemMetrics(int nCmdId);
+		[DllImport("kernel32.dll")]
+		private static extern bool GetNumberOfConsoleInputEvents(IntPtr hConsoleInput, out int lpcNumberOfEvents);
+		[DllImport("kernel32.dll")]
+		private static extern bool PeekConsoleInput(IntPtr hconsoleInput, [Out] INPUT_RECORD[] lpBuffer, int nLength, out int lpNumberOfEventsRead);
 
 
-		public static Dictionary<Keys, bool> PrevKeysState { get; set; }
-		public static Dictionary<Keys, bool> CurrentKeysState {  get; set; }
+		public static Dictionary<Keys, bool> PrevKeysState { get; private set; }
+		public static Dictionary<Keys, bool> CurrentKeysState {  get; private set; }
+		public static int Scroll { get; private set; }
+
+		private static IntPtr InputConsoleHandle { get; set; }
+		private static IntPtr OutputConsoleHandle { get; set; }
 		public static Vec2 MousePosPx
 		{
 			get {
@@ -168,6 +214,10 @@ namespace Moyai.Impl.Input
 		{
 			var coords = (MousePosPx - new Vec2(0, TitleBarHeight)) / FontSize;
 			return (coords - new Vec2(1, 0)).Clamp(new(0, 0), buf.Size - new Vec2(1));
+		}
+		public static Vec2 MousePos()
+		{
+			return (MousePosPx - new Vec2(0, TitleBarHeight)) / FontSize - new Vec2(1, 0);
 		}
 		public static Vec2 WindowSize
 		{
@@ -186,14 +236,14 @@ namespace Moyai.Impl.Input
 			// Set windows handle for console
 			ConsoleWindowHandle = GetConsoleWindow();
 
-			
-			IntPtr inputConsoleHandle = GetStdHandle(STD_INPUT_HANDLE);
-			IntPtr outputConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-			if (!GetCurrentConsoleFont(outputConsoleHandle, false, out CONSOLE_FONT_INFO font))
+			InputConsoleHandle = GetStdHandle(STD_INPUT_HANDLE);
+			OutputConsoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+			if (!GetCurrentConsoleFont(OutputConsoleHandle, false, out CONSOLE_FONT_INFO font))
 				throw new MoyaiException("Unable to get console font");
 
-			if (!GetConsoleMode(inputConsoleHandle, out uint consoleMode))
+			if (!GetConsoleMode(InputConsoleHandle, out uint consoleMode))
 				throw new MoyaiException("Unable to get console mode");
 
 			// Disable console quick edit
@@ -203,7 +253,7 @@ namespace Moyai.Impl.Input
 			consoleMode &= ~ENABLE_QUICK_EDIT;
 
 			// Set the new mode
-			if (!SetConsoleMode(inputConsoleHandle, consoleMode))
+			if (!SetConsoleMode(InputConsoleHandle, consoleMode))
 				throw new MoyaiException("Unable to set console mode");
 
 			// Get console's font size
@@ -219,11 +269,35 @@ namespace Moyai.Impl.Input
 
 		public static void Update()
 		{
+			Scroll = 0;
 			PrevKeysState = new(CurrentKeysState);
-			foreach(var key in PrevKeysState.Keys)
+			foreach(var key in Enum.GetValues(typeof(Keys)).Cast<Keys>())
 			{
 				CurrentKeysState[key] = KeyPressed(key);
 			}
+
+			// getting mouse scroll kinda just doesn't work...
+			/*GetNumberOfConsoleInputEvents(InputConsoleHandle, out int event_count);
+			var events = new INPUT_RECORD[event_count];
+			PeekConsoleInput(InputConsoleHandle, events, event_count, out int _);
+
+			foreach(var @event in events)
+			{
+				//mouse event
+				if(@event.EventType == 0x0002)
+				{
+					var m_event = @event.MouseEvent;
+					//mouse scroll
+					if(m_event.EventFlags != 0x0001)
+					{
+						if ((m_event.ButtonState >> 16) > 0)
+							Scroll++;
+						else
+							Scroll--;
+					}
+				}
+			}*/
+
 		}
 
 		public static InputType KeyState(Keys key)
@@ -240,7 +314,7 @@ namespace Moyai.Impl.Input
 			}
 			else
 			{
-				if (CurrentKeysState[key])
+				if (PrevKeysState[key])
 					return InputType.JustReleased;
 				else
 					return InputType.Released;
