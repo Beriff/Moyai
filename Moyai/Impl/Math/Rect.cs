@@ -8,27 +8,27 @@ namespace Moyai.Impl.Math
 {
 	public class Rect
 	{
-		public Vec2 Start { get; set; }
-		public Vec2 End { get; set; }
-		public Vec2 Center { get => Start + (End - Start) / 2; }
+		public Vec2I Start { get; set; }
+		public Vec2I End { get; set; }
+		public Vec2I Center { get => Start + (End - Start) / 2; }
 
-		public static Rect FromSize(Vec2 start, Vec2 size)
+		public static Rect FromSize(Vec2I start, Vec2I size)
 		{
 			return new(start, start + size);
 		}
 
-		public static Rect FromSize(Vec2 start, int size)
+		public static Rect FromSize(Vec2I start, int size)
 		{
-			return new(start, start + new Vec2(size));
+			return new(start, start + new Vec2I(size));
 		}
 
-		public bool Contains(Vec2 point)
+		public bool Contains(Vec2I point)
 		{
 			return point.X >= Start.X && point.X <= End.X
 				&& point.Y >= Start.Y && point.Y <= End.Y;
 		}
 
-		public Rect(Vec2 start, Vec2 end)
+		public Rect(Vec2I start, Vec2I end)
 		{
 			Start = start;
 			End = end;

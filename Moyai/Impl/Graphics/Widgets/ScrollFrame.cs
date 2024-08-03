@@ -5,9 +5,9 @@ namespace Moyai.Impl.Graphics.Widgets
 {
 	public class ScrollFrame : Frame
 	{
-		public ScrollFrame(Symbol[] label, ConsoleColor border, Vec2 size) : base(label, border, size)
+		public ScrollFrame(Symbol[] label, ConsoleColor border, Vec2I size) : base(label, border, size)
 		{
-			Buffer = new(AbsoluteSize - new Vec2(1));
+			Buffer = new(AbsoluteSize - new Vec2I(1));
 			OnClick = () => 
 			{ 
 				Focused = !Focused;
@@ -32,12 +32,12 @@ namespace Moyai.Impl.Graphics.Widgets
 			Buffer.Clear();
 			foreach(var child in Children)
 			{
-				child.Position += new Vec2(0, Scroll);
+				child.Position += new Vec2I(0, Scroll);
 				child.Draw(Buffer);
-				child.Position -= new Vec2(0, Scroll);
+				child.Position -= new Vec2I(0, Scroll);
 			}
 
-			Buffer.Blit(buf, Position + new Vec2(1));
+			Buffer.Blit(buf, Position + new Vec2I(1));
 
 			base.Draw(buf);
 		}

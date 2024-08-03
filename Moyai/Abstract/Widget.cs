@@ -11,25 +11,25 @@ namespace Moyai.Abstract
 		protected Widget? _Parent;
 		protected bool _Active;
 		protected bool _Visible;
-		protected Vec2 _Position;
-		protected Vec2 _Size;
+		protected Vec2I _Position;
+		protected Vec2I _Size;
 		protected bool _Hovered;
 
 		public virtual Widget? Parent { get => _Parent; set => _Parent = value; }
 		public virtual bool Active { get => _Active; set => _Active = value; }
 		public virtual bool Visible { get => _Visible; set => _Visible = value; }
-		public virtual Vec2 Position { get => _Position; set => _Position = value; }
-		public virtual Vec2 Size { get => _Size; set => _Size = value; }
-		public virtual Vec2 RelativeSize { get; set; }
+		public virtual Vec2I Position { get => _Position; set => _Position = value; }
+		public virtual Vec2I Size { get => _Size; set => _Size = value; }
+		public virtual Vec2I RelativeSize { get; set; }
 		public virtual string Name { get => GetHashCode().ToString() + GetType().Name; }
-		public Rect Bounds { get => new(Position, Position + AbsoluteSize - new Vec2(1)); }
+		public Rect Bounds { get => new(Position, Position + AbsoluteSize - new Vec2I(1)); }
 		public virtual bool Hovered { get => _Hovered; set => _Hovered = value; }
 
 		public Action OnHover { get; set; } = () => { };
 		public Action OnHoverEnd { get; set; } = () => { };
 		public Action OnClick { get; set; } = () => { };
 
-		public Vec2 AbsoluteSize
+		public Vec2I AbsoluteSize
 		{
 			get
 			{
@@ -58,7 +58,7 @@ namespace Moyai.Abstract
 		}
 		public abstract void Draw(ConsoleBuffer buf);
 
-		protected Widget(Widget? parent, bool active, bool visible, Vec2 position, Vec2 size, Vec2 relsize)
+		protected Widget(Widget? parent, bool active, bool visible, Vec2I position, Vec2I size, Vec2I relsize)
 		{
 			Parent = parent;
 			Active = active;
@@ -76,7 +76,7 @@ namespace Moyai.Abstract
 		public virtual List<Widget> Children { get; private set; }
 		public bool Focused { get; set; }
 
-		public override Vec2 Position 
+		public override Vec2I Position 
 		{ 
 			get => _Position;
 			set
@@ -94,7 +94,7 @@ namespace Moyai.Abstract
 			base.Update();
 		}
 
-		protected ContainerWidget(Widget? parent, bool active, bool visible, Vec2 position, Vec2 size, Vec2 relsize)
+		protected ContainerWidget(Widget? parent, bool active, bool visible, Vec2I position, Vec2I size, Vec2I relsize)
 			: base(parent, active, visible, position, size, relsize)
 		{
 			Children = new();

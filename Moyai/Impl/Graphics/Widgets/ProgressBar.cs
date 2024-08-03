@@ -25,14 +25,14 @@ namespace Moyai.Impl.Graphics.Widgets
 			buf.BlitSymbString(
 				Symbol.Text(s,
 				new ConsoleColor(Front.Color.Background, ConsoleColor.Contrast(Front.Color.Background))),
-				Bounds.Center - new Vec2(s.Length / 2, 0));
+				Bounds.Center - new Vec2I(s.Length / 2, 0));
 			buf.BlitSymbString(
 				Symbol.Text(s,
 				new ConsoleColor(Front.Color.Background, ConsoleColor.Contrast(Front.Color.Background))),
-				Bounds.Center - new Vec2(s.Length / 2, 0));
+				Bounds.Center - new Vec2I(s.Length / 2, 0));
 		}
 
-		public ProgressBar(float max, float min, Symbol back, Symbol front, string? label, Vec2 size)
+		public ProgressBar(float max, float min, Symbol back, Symbol front, string? label, Vec2I size)
 			: base(null, true, true, new(0), size, new(0))
 		{
 			Label = label;

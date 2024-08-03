@@ -66,7 +66,7 @@ namespace Moyai.Impl.Graphics.Widgets
             }
         }
 
-        public Frame(Symbol[] label, ConsoleColor border, Vec2 size)
+        public Frame(Symbol[] label, ConsoleColor border, Vec2I size)
             : base(null, true, true, new(0), size, new(0))
         {
             Label = label;

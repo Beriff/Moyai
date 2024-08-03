@@ -1,15 +1,11 @@
 ﻿using Moyai.Impl.Physics;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Moyai.Impl.Physics.Raytracing;
 
 namespace Moyai.Abstract.Physics
 {
-	public abstract class Body
+    public abstract class Body
 	{
-		public abstract Vec3F[]? Intersection(Ray ray);
+		public abstract List<Vec3F>? Intersection(Ray ray);
+		public abstract Vec2F UV(Vec3F surface);
 	}
 }

@@ -27,10 +27,10 @@ namespace Moyai.Impl.Graphics.Widgets
 
 			buf.BlitSymbString(
 				Symbol.Text(Label, color), 
-				Bounds.Center - new Vec2(Label.Length / 2, 0));
+				Bounds.Center - new Vec2I(Label.Length / 2, 0));
 		}
 
-		public Button(string label, ConsoleColor maincol, ConsoleColor hovercol, Vec2 size)
+		public Button(string label, ConsoleColor maincol, ConsoleColor hovercol, Vec2I size)
 			: base(null, true, true, new(0), size, new(0))
 		{
 			Label = label;

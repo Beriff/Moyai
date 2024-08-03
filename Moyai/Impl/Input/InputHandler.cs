@@ -168,7 +168,7 @@ namespace Moyai.Impl.Input
 		private const int STD_INPUT_HANDLE = -10;
 		private const int STD_OUTPUT_HANDLE = -11;
 		private static IntPtr ConsoleWindowHandle;
-		public static Vec2 FontSize { get; private set; }
+		public static Vec2I FontSize { get; private set; }
 		public static int TitleBarHeight { get; private set; }
 
 		[DllImport("user32.dll")]
@@ -202,24 +202,24 @@ namespace Moyai.Impl.Input
 
 		private static IntPtr InputConsoleHandle { get; set; }
 		private static IntPtr OutputConsoleHandle { get; set; }
-		public static Vec2 MousePosPx
+		public static Vec2I MousePosPx
 		{
 			get {
 				GetCursorPos(out WinPoint pos);
 				GetWindowRect(ConsoleWindowHandle, out WinRect wr);
-				return new Vec2(pos.x, pos.y) - new Vec2(wr.left, wr.top);
+				return new Vec2I(pos.x, pos.y) - new Vec2I(wr.left, wr.top);
 			}
 		}
-		public static Vec2 MousePos(ConsoleBuffer buf)
+		public static Vec2I MousePos(ConsoleBuffer buf)
 		{
-			var coords = (MousePosPx - new Vec2(0, TitleBarHeight)) / FontSize;
-			return (coords - new Vec2(1, 0)).Clamp(new(0, 0), buf.Size - new Vec2(1));
+			var coords = (MousePosPx - new Vec2I(0, TitleBarHeight)) / FontSize;
+			return (coords - new Vec2I(1, 0)).Clamp(new(0, 0), buf.Size - new Vec2I(1));
 		}
-		public static Vec2 MousePos()
+		public static Vec2I MousePos()
 		{
-			return (MousePosPx - new Vec2(0, TitleBarHeight)) / FontSize - new Vec2(1, 0);
+			return (MousePosPx - new Vec2I(0, TitleBarHeight)) / FontSize - new Vec2I(1, 0);
 		}
-		public static Vec2 WindowSize
+		public static Vec2I WindowSize
 		{
 			get
 			{

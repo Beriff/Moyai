@@ -6,9 +6,9 @@ namespace Moyai.Impl.Graphics
 {
     public class ConsoleBuffer
     {
-        public Vec2 Size { get; private set; }
+        public Vec2I Size { get; private set; }
         public Symbol[,] Grid { get; private set; }
-        public Rect Area { get => new(Vec2.Zero, Size); }
+        public Rect Area { get => new(Vec2I.Zero, Size); }
         private int LinearSize { get => Size.X * Size.Y + Size.X - 1; }
 
         public void Render()
@@ -26,7 +26,7 @@ namespace Moyai.Impl.Graphics
             Console.SetCursorPosition(0, 0);
         }
 
-        public void Blit(ConsoleBuffer accepting, Vec2 pos)
+        public void Blit(ConsoleBuffer accepting, Vec2I pos)
         {
             for (int y = 0; y < Size.Y; y++)
             {
@@ -44,7 +44,7 @@ namespace Moyai.Impl.Graphics
             }
         }
 
-        public void BlitSymbString(Symbol[] str, Vec2 pos)
+        public void BlitSymbString(Symbol[] str, Vec2I pos)
         {
             for (int i = 0; i < str.Length; i++)
             {
@@ -86,7 +86,7 @@ namespace Moyai.Impl.Graphics
             }
         }
 
-        public ConsoleBuffer(Vec2 size)
+        public ConsoleBuffer(Vec2I size)
         {
             Size = size;
             Grid = new Symbol[size.X, size.Y];

@@ -28,6 +28,10 @@
 		{
 			return ((byte,byte,byte))((255 - a.R) / 2, (255 - a.G) / 2, (255 - a.B) / 2);
 		}
+		public static ColorPack Greyscale(float s)
+		{
+			return ((byte,byte,byte))(255 * s, 255 * s, 255 * s);
+		}
 
 		public static ConsoleColor Default { get => OnlyFg((255, 255, 255)); }
 

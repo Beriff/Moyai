@@ -19,7 +19,7 @@ namespace Moyai.Impl.Graphics
 			}
 		}
 
-		public Rectangle(Vec2 start, Vec2 end, Symbol fill)
+		public Rectangle(Vec2I start, Vec2I end, Symbol fill)
 		{
 			MathRect = new(start, end);
 			Fill = fill;
