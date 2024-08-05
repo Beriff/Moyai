@@ -45,7 +45,7 @@ namespace Moyai.Abstract
 		{
 
 			bool prev_hovered = Hovered;
-			Hovered = Bounds.Contains(InputHandler.MousePos());
+			Hovered = Bounds.Contains(InputHandler.CurrentMousePos);
 			if(!prev_hovered && Hovered) {
 				OnHover();
 			}

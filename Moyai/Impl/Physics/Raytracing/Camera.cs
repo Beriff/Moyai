@@ -11,6 +11,19 @@ namespace Moyai.Impl.Physics.Raytracing
         public Vec3F Position { get; set; }
         public float ClipDistance { get; set; }
         public ConsoleShader Shader { get; set; }
+        public ConsoleShader BackgroundShader { get; set; }
+        public Vec3F RelativeRight { get => Look.Cross(new(0,1,0)); }
+        public Vec3F Look
+        {
+            get
+            {
+                return (Viewport.Center - Position).Normalized;
+            }
+            /*set
+            {
+                var center = (Viewport.Center - Position).Normalized.Ro;
+            }*/
+        }
 
         public void Render(Body[] world)
         {
@@ -19,16 +32,23 @@ namespace Moyai.Impl.Physics.Raytracing
             {
                 for (float y = 0; y < Buffer.Size.Y; y++)
                 {
+					var screen_x = x / Buffer.Size.X;
+					var screen_y = y / Buffer.Size.Y;
+					Buffer[(int)x, (int)y] = BackgroundShader.Get(new(
+                                    new((int)x, (int)y),
+                                    Vec2F.Zero, Vec3F.Zero,
+                                    new(screen_x, screen_y), null));
                     foreach (var body in world)
                     {
-						var screen_x = x / Buffer.Size.X;
-						var screen_y = y / Buffer.Size.Y;
+						
 						Ray ray = new(Position - Viewport[screen_x, screen_y], Position);
                         var intersections = body.Intersection(ray);
 
 						if (intersections != null)
                         {
                             var worldpos = intersections.OrderBy((i) => (Position - i).Length).First();
+                            if (worldpos.Dot(Look) < 0 || (worldpos - Position).Length < ClipDistance)
+                                continue;
                             Buffer[(int)x, (int)y] = Shader.Get(
                                 new(
                                     new((int)x, (int)y), 
@@ -45,6 +65,7 @@ namespace Moyai.Impl.Physics.Raytracing
         {
             Position = position;
             Viewport = viewport;
+            //ClipDistance = Look.Length / 2;
             Buffer = new(buf_size);
             Shader = new((_) => new('+', ConsoleColor.Default));
         }
@@ -52,14 +73,15 @@ namespace Moyai.Impl.Physics.Raytracing
         public void Move(Vec3F shift)
         {
             Position += shift;
-            Viewport = new(Viewport.Start + shift, Viewport.End + shift);
+            var v = Viewport;
+            v.Position += shift;
+            Viewport = v;
         }
 
         public void Rotate(Vec3F rotation)
         {
             var viewport = Viewport - Position;
-            viewport.Start *= rotation.Rotation;
-            viewport.End *= rotation.Rotation;
+            viewport = viewport.Rotate(rotation);
             viewport += Position;
             Viewport = viewport;
         }

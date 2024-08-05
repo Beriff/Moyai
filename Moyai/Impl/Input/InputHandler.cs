@@ -194,11 +194,36 @@ namespace Moyai.Impl.Input
 		private static extern bool GetNumberOfConsoleInputEvents(IntPtr hConsoleInput, out int lpcNumberOfEvents);
 		[DllImport("kernel32.dll")]
 		private static extern bool PeekConsoleInput(IntPtr hconsoleInput, [Out] INPUT_RECORD[] lpBuffer, int nLength, out int lpNumberOfEventsRead);
+		[DllImport("User32.dll")]
+		public static extern long SetCursorPos(int x, int y);
+
+		[DllImport("User32.dll")]
+		public static extern bool ClientToScreen(IntPtr hWnd, ref POINT point);
+		[DllImport("user32.dll")]
+		private static extern int ShowCursor(bool bShow);
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct POINT
+		{
+			public int x;
+			public int y;
+
+			public POINT(int X, int Y)
+			{
+				x = X;
+				y = Y;
+			}
+		}
 
 
 		public static Dictionary<Keys, bool> PrevKeysState { get; private set; }
 		public static Dictionary<Keys, bool> CurrentKeysState {  get; private set; }
-		public static int Scroll { get; private set; }
+		public static Vec2I PrevMousePos { get; private set; }
+		public static Vec2I CurrentMousePos { get; private set; }
+		public static Vec2I MouseDelta
+		{
+			get => CurrentMousePos - PrevMousePos;
+		}
 
 		private static IntPtr InputConsoleHandle { get; set; }
 		private static IntPtr OutputConsoleHandle { get; set; }
@@ -210,12 +235,16 @@ namespace Moyai.Impl.Input
 				return new Vec2I(pos.x, pos.y) - new Vec2I(wr.left, wr.top);
 			}
 		}
+		public static void SetCursorVisibility(bool visible)
+		{
+			ShowCursor(visible);
+		}
 		public static Vec2I MousePos(ConsoleBuffer buf)
 		{
 			var coords = (MousePosPx - new Vec2I(0, TitleBarHeight)) / FontSize;
 			return (coords - new Vec2I(1, 0)).Clamp(new(0, 0), buf.Size - new Vec2I(1));
 		}
-		public static Vec2I MousePos()
+		private static Vec2I MousePos()
 		{
 			return (MousePosPx - new Vec2I(0, TitleBarHeight)) / FontSize - new Vec2I(1, 0);
 		}
@@ -227,7 +256,19 @@ namespace Moyai.Impl.Input
 				return new(wr.right, wr.bottom);
 			}
 		}
+		public static void SnapCursor()
+		{
+			var before_snap = MousePos();
+			GetWindowRect(ConsoleWindowHandle, out WinRect wr);
+			var center_x = wr.left + (wr.right - wr.left) / 2;
+			var center_y = wr.top + (wr.bottom - wr.top) / 2;
+			POINT p = new(center_x, center_y);
+			//ClientToScreen(this.Handle, ref p);
+			SetCursorPos(p.x, p.y);
+			var after_snap = MousePos();
+			PrevMousePos -= (after_snap - before_snap);
 
+		}
 		static InputHandler()
 		{
 			PrevKeysState = new();
@@ -269,12 +310,14 @@ namespace Moyai.Impl.Input
 
 		public static void Update()
 		{
-			Scroll = 0;
 			PrevKeysState = new(CurrentKeysState);
 			foreach(var key in Enum.GetValues(typeof(Keys)).Cast<Keys>())
 			{
 				CurrentKeysState[key] = KeyPressed(key);
 			}
+
+			PrevMousePos = CurrentMousePos;
+			CurrentMousePos = MousePos();
 
 			// getting mouse scroll kinda just doesn't work...
 			/*GetNumberOfConsoleInputEvents(InputConsoleHandle, out int event_count);

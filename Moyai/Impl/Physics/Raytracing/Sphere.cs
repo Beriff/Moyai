@@ -23,19 +23,10 @@ namespace Moyai.Impl.Physics.Raytracing
             d = MathF.Sqrt(d);
 
             //compute the intersection points
-            float t1 = (-B - d) / 2;
-            float t2 = (-B + d) / 2;
-            Vec3F point1 = ray.Point(t1);
-            Vec3F point2 = ray.Point(t2);
+            Vec3F point1 = ray.Point((-B - d) / 2);
+            Vec3F point2 = ray.Point((-B + d) / 2);
 
-            var ls = new List<Vec3F>();
-            if(t1 <= 0)
-                ls.Add(point1);
-            if(t2 <= 0) 
-                ls.Add(point2);
-            if (ls.Count == 0)
-                return null;
-            return ls;
+            return new([point1, point2]);
         }
 
 		public override Vec2F UV(Vec3F surface)

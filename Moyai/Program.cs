@@ -20,7 +20,7 @@ namespace Moyai
 		{
 			// create a physical scene
 			var clip_dist = 10;
-			var vp_size = (x: 80, y: 30);
+			var vp_size = (x: 70, y: 50);
 
 			camera = new(
 				/*position*/
@@ -28,47 +28,64 @@ namespace Moyai
 				/*viewport*/
 				new(
 					new(clip_dist, vp_size.y / 2f, -vp_size.x / 2f),
-					new(clip_dist, -vp_size.y / 2f, vp_size.x / 2f)
+					new(vp_size.x, vp_size.y)
 				),
 				/*output buf size*/
 				new(vp_size.x, vp_size.y)
 			)
 			{
-				Shader = TextureUV(Texture.LoadBitmap(@"C:\Users\Maxim\Desktop\test.bmp"))
+				Shader = TextureUV(Texture.LoadBitmap(@"C:\Users\Maxim\Desktop\test.bmp")),
+				BackgroundShader = new((input) =>
+				{
+					if (new Random((int)MathHelper.Pairing(input.PixelCoord.X, input.PixelCoord.Y)).NextSingle() < 0.03f)
+						return new('*', new((0, 0, 0), (255, 255, 255)));
+					else
+						return new(' ', new((0, 0, 0)));
+				})
 			};
 
 			scene = [new Sphere(new Vec3F(clip_dist + 15, 0, 0), 15)];
 		}
 		public override void Update()
 		{
+			
+
 			float mult = camspeed * (float)TimeDelta;
 			if (InputHandler.KeyPressed(Keys.D))
 				camera.Move(new Vec3F(0, 0, 1) * mult);
 			if (InputHandler.KeyPressed(Keys.A))
 				camera.Move(new Vec3F(0, 0, -1) * mult);
 			if (InputHandler.KeyPressed(Keys.W))
-				camera.Move(new Vec3F(1, 0, 0) * mult);
+				camera.Move(camera.Look * mult);
 			if (InputHandler.KeyPressed(Keys.S))
-				camera.Move(new Vec3F(-1, 0, 0) * mult);
+				camera.Move(-camera.Look * mult);
 
-			if (InputHandler.KeyPressed(Keys.ArrowRight))
-				camera.Rotate(new Vec3F(0, 0, 0.01f));
+			if (!InputHandler.KeyPressed(Keys.Esc))
+				camera.Rotate(new Vec3F(InputHandler.MouseDelta.Y / 25f, 0, InputHandler.MouseDelta.X / 25f) * mult);
+			//if (!InputHandler.KeyPressed(Keys.Esc))
+				//camera.Rotate(new Vec3F(InputHandler.MouseDelta.Y / 15f, 0, 0) * mult);
 
 			base.Update();
+
+			if (!InputHandler.KeyPressed(Keys.Esc))
+				InputHandler.SnapCursor();
 		}
 		public override void Render()
 		{
 			camera.Buffer.Clear();
 
+			
+
+			camera.Render(scene);
+			
+
 			// Draw FPS
 			{
 				var text = Symbol.Text(
-					$"{1 / TimeDelta} FPS",
+					$"{Math.Truncate(1 / TimeDelta)} FPS",
 					Impl.ConsoleColor.OnlyFg((255, 255, 255)));
 				camera.Buffer.BlitSymbString(text, Vec2I.Zero);
 			}
-
-			camera.Render(scene);
 			camera.Buffer.Render();
 			base.Render();
 		}

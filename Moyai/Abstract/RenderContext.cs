@@ -17,6 +17,10 @@ namespace Moyai.Abstract
         }
         public virtual void Update()
         {
+            /*if (InputHandler.KeyState(Keys.Esc) == InputType.JustPressed)
+                InputHandler.SetCursorVisibility(true);
+            else if (InputHandler.KeyState(Keys.Esc) == InputType.JustReleased)
+                InputHandler.SetCursorVisibility(false);*/
 			InputHandler.Update();
 		}
 
@@ -28,7 +32,7 @@ namespace Moyai.Abstract
 
         public void Start()
         {
-            while(!Finished)
+			while (!Finished)
             {
                 Render();
                 Update();

@@ -1,56 +1,50 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Moyai.Impl.Physics.Raytracing
+﻿namespace Moyai.Impl.Physics.Raytracing
 {
     public struct RectF
     {
-        public Vec3F Start;
-        public Vec3F End;
+        public Vec3F Position;
+        public Vec2F Size;
+        public Vec3F Down = -Vec3F.Up;
+        public Vec3F Right = Vec3F.Right;
 
-        public Vec3F Size
+        public readonly RectF Rotate(Vec3F rotation)
         {
-            get => End - Start;
-        }
-        public static RectF FromCenter(Vec3F center, float size, Vec3F? bottomright = null)
-        {
-            bottomright ??= new(1, -1, 0);
-            return new(
-                center - (Vec3F)bottomright * size / 2,
-                center + (Vec3F)bottomright * size / 2
-                );
+            var mat = rotation.Rotation;
+            var rect = this;
+            rect.Position *= mat;
+            rect.Down *= mat;
+            rect.Right *= mat;
+            return rect;
         }
         public readonly Vec3F Center
         {
-            get => Start.Lerp(End, .5f);
+            get => this[.5f, .5f];
         }
 
-        public RectF(Vec3F start, Vec3F end)
+        public RectF(Vec3F pos, Vec2F size, Vec3F? down = null, Vec3F? right = null)
         {
-            Start = start;
-            End = end;
+            Position = pos;
+            Size = size;
+            Down = down ?? -Vec3F.Up;
+            Right = right ?? Vec3F.Right;
         }
 
         public readonly Vec3F this[float tx, float ty]
         {
-            get
-            {
-                var x = Start.Lerp(new Vec3F(End.X, Start.Y, End.Z), tx);
-                var y = Start.Lerp(new Vec3F(Start.X, End.Y, Start.Z), ty);
-                return new(x.X, y.Y, x.Z);
-            }
+            get => Position + (Down * ty * Size.Y) + (Right * tx * Size.X);
         }
 
         public static RectF operator + (RectF r, Vec3F v)
         {
-            return new(r.Start + v, r.End + v);
+            var nr = r;
+            r.Position += v;
+            return nr;
         }
 		public static RectF operator -(RectF r, Vec3F v)
 		{
-			return new(r.Start - v, r.End - v);
+			var nr = r;
+			r.Position -= v;
+			return nr;
 		}
 	}
 }

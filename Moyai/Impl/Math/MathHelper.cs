@@ -10,5 +10,9 @@
 		{
 			return a + (b-a) * p;
 		}
+		public static float Pairing(float a, float b)
+		{
+			return 0.5f * (a + b) * (a + b + 1) + b;
+		}
 	}
 }
