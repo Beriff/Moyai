@@ -5,7 +5,7 @@ using static Moyai.Impl.Physics.Raytracing.ConsoleShader;
 
 namespace Moyai.Impl.Physics.Raytracing
 {
-	public class ConsoleShader(Func<ShaderInput, Symbol> code)
+    public class ConsoleShader(Func<ShaderInput, Symbol> code)
 	{
 		public readonly struct ShaderInput
 		{

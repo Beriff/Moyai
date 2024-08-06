@@ -1,4 +1,6 @@
-﻿namespace Moyai.Impl.Physics.Raytracing
+﻿using Moyai.Impl.Math;
+
+namespace Moyai.Impl.Physics.Raytracing
 {
     public struct RectF
     {

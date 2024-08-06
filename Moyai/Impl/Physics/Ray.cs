@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Moyai.Impl.Math;
 
 namespace Moyai.Impl.Physics.Raytracing
 {

@@ -1,16 +1,15 @@
 ﻿using Moyai.Abstract;
 using Moyai.Abstract.Physics;
 using Moyai.Impl.Graphics;
-using Moyai.Impl.Graphics.Widgets;
 using Moyai.Impl.Input;
 using Moyai.Impl.Math;
 using Moyai.Impl.Physics.Raytracing;
 
 using static Moyai.Impl.Physics.Raytracing.ConsoleShader;
 
-namespace Moyai
+namespace MoyaiExample
 {
-    class ExampleApp : RenderContext
+	class ExampleApp : RenderContext
 	{
 		Camera camera;
 		Body[] scene;
@@ -48,7 +47,7 @@ namespace Moyai
 		}
 		public override void Update()
 		{
-			
+
 
 			float mult = camspeed * (float)TimeDelta;
 			if (InputHandler.KeyPressed(Keys.D))
@@ -63,7 +62,7 @@ namespace Moyai
 			if (!InputHandler.KeyPressed(Keys.Esc))
 				camera.Rotate(new Vec3F(InputHandler.MouseDelta.Y / 25f, 0, InputHandler.MouseDelta.X / 25f) * mult);
 			//if (!InputHandler.KeyPressed(Keys.Esc))
-				//camera.Rotate(new Vec3F(InputHandler.MouseDelta.Y / 15f, 0, 0) * mult);
+			//camera.Rotate(new Vec3F(InputHandler.MouseDelta.Y / 15f, 0, 0) * mult);
 
 			base.Update();
 
@@ -74,16 +73,16 @@ namespace Moyai
 		{
 			camera.Buffer.Clear();
 
-			
+
 
 			camera.Render(scene);
-			
+
 
 			// Draw FPS
 			{
 				var text = Symbol.Text(
 					$"{Math.Truncate(1 / TimeDelta)} FPS",
-					Impl.ConsoleColor.OnlyFg((255, 255, 255)));
+                    Moyai.Impl.ConsoleColor.OnlyFg((255, 255, 255)));
 				camera.Buffer.BlitSymbString(text, Vec2I.Zero);
 			}
 			camera.Buffer.Render();

@@ -1,4 +1,5 @@
 ﻿using Moyai.Abstract.Physics;
+using Moyai.Impl.Math;
 
 namespace Moyai.Impl.Physics.Raytracing
 {
