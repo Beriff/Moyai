@@ -22,8 +22,9 @@ namespace Moyai.Abstract
 		public virtual Vec2I Size { get => _Size; set => _Size = value; }
 		public virtual Vec2I RelativeSize { get; set; }
 		public virtual string Name { get => GetHashCode().ToString() + GetType().Name; }
-		public Rect Bounds { get => new(Position, Position + AbsoluteSize - new Vec2I(1)); }
+		public virtual Rect Bounds { get => new(Position, Position + AbsoluteSize - new Vec2I(1)); }
 		public virtual bool Hovered { get => _Hovered; set => _Hovered = value; }
+		public int ZLayer { get; set; }
 
 		public Action OnHover { get; set; } = () => { };
 		public Action OnHoverEnd { get; set; } = () => { };

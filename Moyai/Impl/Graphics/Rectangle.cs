@@ -7,6 +7,7 @@ namespace Moyai.Impl.Graphics
 	{
 		public Rect MathRect { get; set; }
 		public Symbol Fill { get; set; }
+		public int ZLayer { get; set; }
 
 		public void Draw(ConsoleBuffer buf)
 		{
