@@ -1,10 +1,7 @@
 ﻿using Moyai.Abstract;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Moyai.Impl.Graphics.Widgets;
+using Moyai.Impl.Input;
+using Moyai.Impl.Math;
 
 namespace Moyai.Impl.Graphics
 {
@@ -12,6 +9,27 @@ namespace Moyai.Impl.Graphics
 	{
 		public ConsoleBuffer Buffer { get; set; }
 		public List<IDrawable> Drawables { get; set; }
+
+		public (Window, InputConsumer) CreateDialogue(string label, Vec2I size)
+		{
+			var w = new Window(label, size);
+			Drawables.Add(w);
+			
+			var c = new InputConsumer(w.Name + "_input", InputBus.HigherPriority("UI"))
+			{ Blocking = true };
+			InputBus.AddConsumer("UI", c);
+
+			w.OnClose = () =>
+			{
+				Drawables.Remove(w);
+				InputBus.RemoveConsumer(c);
+			};
+
+			w.InputUI = c;
+
+			//throw new Exception(InputBus.GetBus(c)[1].InputReceived.ToString());
+			return (w, c);
+		}
 
 		public void Update()
 		{

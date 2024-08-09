@@ -15,6 +15,7 @@ namespace Moyai.Abstract
 		protected Vec2I _Size;
 		protected bool _Hovered;
 
+		public InputConsumer InputUI { get; set; } = InputBus.Consumer("UI", "Master");
 		public virtual Widget? Parent { get => _Parent; set => _Parent = value; }
 		public virtual bool Active { get => _Active; set => _Active = value; }
 		public virtual bool Visible { get => _Visible; set => _Visible = value; }
@@ -44,15 +45,16 @@ namespace Moyai.Abstract
 
 		public virtual void Update() 
 		{
+			if (!Active) return;
 
 			bool prev_hovered = Hovered;
-			Hovered = Bounds.Contains(InputHandler.CurrentMousePos);
+			Hovered = Bounds.Contains(InputUI.MousePos());
 			if(!prev_hovered && Hovered) {
 				OnHover();
 			}
 			else if (prev_hovered && Hovered) { OnHoverEnd(); }
 
-			if(Hovered && InputHandler.KeyState(Keys.MouseLeft) == InputType.JustReleased)
+			if(Hovered && InputUI.KeyState(Keys.MouseLeft) == InputType.JustReleased)
 			{
 				OnClick();
 			}
@@ -77,6 +79,11 @@ namespace Moyai.Abstract
 		public virtual List<Widget> Children { get; private set; }
 		public bool Focused { get; set; }
 
+		public virtual void AddChild(Widget child)
+		{
+			Children.Add(child);
+		}
+
 		public override Vec2I Position 
 		{ 
 			get => _Position;
@@ -91,8 +98,16 @@ namespace Moyai.Abstract
 
 		public override void Update()
 		{
+			if (!Active) return;
+
 			foreach(var child in Children) { child.Update(); }
 			base.Update();
+		}
+
+		public override void Draw(ConsoleBuffer buf)
+		{
+			foreach(var child in Children)
+				child.Draw(buf);
 		}
 
 		protected ContainerWidget(Widget? parent, bool active, bool visible, Vec2I position, Vec2I size, Vec2I relsize)

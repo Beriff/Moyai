@@ -242,9 +242,12 @@ namespace Moyai.Impl.Input
 		public static Vec2I MousePos(ConsoleBuffer buf)
 		{
 			var coords = (MousePosPx - new Vec2I(0, TitleBarHeight)) / FontSize;
+			coords -= new Vec2I(1, 0);
+			if(coords.X < 0 || coords.Y < 0 || coords.X + 1 > buf.Size.X || coords.Y + 1 > buf.Size.Y)
+				return new(-1);
 			return (coords - new Vec2I(1, 0)).Clamp(new(0, 0), buf.Size - new Vec2I(1));
 		}
-		private static Vec2I MousePos()
+		public static Vec2I MousePos()
 		{
 			return (MousePosPx - new Vec2I(0, TitleBarHeight)) / FontSize - new Vec2I(1, 0);
 		}

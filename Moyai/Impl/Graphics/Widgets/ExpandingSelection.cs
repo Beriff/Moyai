@@ -11,6 +11,8 @@ namespace Moyai.Impl.Graphics.Widgets
 
 		public Action<string> OnOptionClick { get; set; }
 
+		public delegate void EventDispatcher(string option);
+
 		protected bool HasExpanded;
 
 		public ExpandingSelection(Symbol[] text, string[] options, Action<string> onOptionClick, Vec2I size)
@@ -21,9 +23,11 @@ namespace Moyai.Impl.Graphics.Widgets
 			OnOptionClick = onOptionClick;
 			HasExpanded = false;
 		}
+		public override Vec2I Size { get => new(MainText.Length, 1); set { } }
 		public override Rect Bounds => new(Position, Position + new Vec2I(MainText.Length, 1));
 		public override void Update()
 		{
+			base.Update();
 			var mpos = InputHandler.CurrentMousePos;
 			if (Hovered)
 			{
@@ -37,11 +41,12 @@ namespace Moyai.Impl.Graphics.Widgets
 			{
 				HasExpanded = false;
 			}
-			base.Update();
 		}
 
 		public override void Draw(ConsoleBuffer buf)
 		{
+			if (!Visible) return;
+
 			var mpos = InputHandler.CurrentMousePos;
 
 			buf.BlitSymbString(MainText, Position);

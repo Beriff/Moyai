@@ -15,6 +15,8 @@ namespace Moyai.Impl.Graphics.Widgets
 
 		public override void Draw(ConsoleBuffer buf)
 		{
+			if (!Visible) return;
+
 			buf.BlitSymbString(Text, Position);
 		}
 

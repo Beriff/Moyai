@@ -11,6 +11,8 @@ namespace Moyai.Impl.Graphics.Widgets
 
 		public override void Draw(ConsoleBuffer buf)
 		{
+			if (!Visible) return;
+
 			var size = AbsoluteSize;
 			for (int x = Position.X; x < Position.X + size.X; x++)
 			{

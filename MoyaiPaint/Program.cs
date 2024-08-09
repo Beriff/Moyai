@@ -5,7 +5,7 @@ using Moyai.Impl.Math;
 
 namespace MoyaiPaint
 {
-	public class MoyaiPaint : RenderContext
+	public partial class MoyaiPaint : RenderContext
 	{
 		private static Vec2I SIZE = new(140, 50);
 
@@ -29,15 +29,6 @@ namespace MoyaiPaint
 			}
 		}
 
-		public MoyaiPaint()
-		{
-			OpenedFile = null;
-			UI = new(Main);
-			_ = UI
-				+ new Rectangle(new(0), new(SIZE.X - 1, 0), new('▓',new((255,255,255))))
-				+ new ExpandingSelection(
-					Symbol.Text("File", new Moyai.Impl.ConsoleColor((255,255,255), (0,0,0))), ["New", "Close"], (s) => { }, new(0));
-		}
 		public override void Render()
 		{
 			UI.Draw();

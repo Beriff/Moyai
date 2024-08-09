@@ -29,6 +29,8 @@ namespace Moyai.Impl.Graphics.Widgets
 
 		public override void Draw(ConsoleBuffer buf)
 		{
+			if (!Visible) return;
+
 			Buffer.Clear();
 			foreach(var child in Children)
 			{
@@ -44,7 +46,8 @@ namespace Moyai.Impl.Graphics.Widgets
 
 		public override void Update()
 		{
-			if(Focused)
+			base.Update();
+			if (Focused)
 			{
 				if (InputHandler.KeyState(Keys.ArrowUp) == InputType.JustPressed)
 				{
@@ -55,7 +58,6 @@ namespace Moyai.Impl.Graphics.Widgets
 					Scroll--;
 				}
 			}
-			base.Update();
 		}
 
 	}

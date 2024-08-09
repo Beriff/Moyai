@@ -14,6 +14,8 @@ namespace Moyai.Impl.Graphics.Widgets
 
 		public override void Draw(ConsoleBuffer buf)
 		{
+			if (!Visible) return;
+
 			float p = (Value - MinValue) / (MaxValue - MinValue);
 
 			new Rectangle(Position, Position + AbsoluteSize, Back).Draw(buf);

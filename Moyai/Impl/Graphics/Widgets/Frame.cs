@@ -11,8 +11,10 @@ namespace Moyai.Impl.Graphics.Widgets
 
         public override void Draw(ConsoleBuffer buf)
         {
-            //Frame's size does account for border. actual empty frame area is `Size - Vec2(1,1)`
-            var size = AbsoluteSize;
+			if (!Visible) return;
+
+			//Frame's size does account for border. actual empty frame area is `Size - Vec2(1,1)`
+			var size = AbsoluteSize;
             for (int x = Position.X; x < Position.X + size.X; x++)
             {
                 for (int y = Position.Y; y < Position.Y + size.Y; y++)
