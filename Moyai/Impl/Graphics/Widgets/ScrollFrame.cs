@@ -5,10 +5,11 @@ namespace Moyai.Impl.Graphics.Widgets
 {
 	public class ScrollFrame : Frame
 	{
+		public bool RenderFrame { get; set; } = true;
 		public ScrollFrame(Symbol[] label, ConsoleColor border, Vec2I size) : base(label, border, size)
 		{
 			Buffer = new(AbsoluteSize - new Vec2I(1));
-			OnClick = () => 
+			OnClick = (w) => 
 			{ 
 				Focused = !Focused;
 				if (Focused)
@@ -24,9 +25,17 @@ namespace Moyai.Impl.Graphics.Widgets
 			};
 		}
 
+		public static ScrollFrame NoFrame(Vec2I size, Vec2I pos)
+		{
+			return new(Array.Empty<Symbol>(), new(), size) 
+			{ 
+				Position = pos, 
+				RenderFrame = false 
+			};
+		}
+
 		public ConsoleBuffer Buffer { get; private set; }
 		public int Scroll { get; set; } = 0;
-
 		public override void Draw(ConsoleBuffer buf)
 		{
 			if (!Visible) return;
@@ -34,30 +43,34 @@ namespace Moyai.Impl.Graphics.Widgets
 			Buffer.Clear();
 			foreach(var child in Children)
 			{
-				child.Position += new Vec2I(0, Scroll);
+				child.Position += new Vec2I(0, Scroll) - Position;
 				child.Draw(Buffer);
-				child.Position -= new Vec2I(0, Scroll);
+				child.Position -= new Vec2I(0, Scroll) - Position;
 			}
 
 			Buffer.Blit(buf, Position + new Vec2I(1));
 
-			base.Draw(buf);
+			if (RenderFrame)
+				base.Draw(buf);
 		}
 
 		public override void Update()
 		{
+			foreach (var child in Children)
+				child.Position += new Vec2I(0, Scroll);
 			base.Update();
-			if (Focused)
+			foreach (var child in Children)
+				child.Position -= new Vec2I(0, Scroll);
+
+			if (InputHandler.KeyState(Keys.ArrowUp) == InputType.JustPressed)
 			{
-				if (InputHandler.KeyState(Keys.ArrowUp) == InputType.JustPressed)
-				{
-					Scroll++;
-				}
-				else if (InputHandler.KeyState(Keys.ArrowDown) == InputType.JustPressed)
-				{
-					Scroll--;
-				}
+				Scroll++;
 			}
+			else if (InputHandler.KeyState(Keys.ArrowDown) == InputType.JustPressed)
+			{
+				Scroll--;
+			}
+			
 		}
 
 	}

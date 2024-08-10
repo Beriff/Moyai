@@ -66,6 +66,9 @@ namespace Moyai.Impl.Graphics.Widgets
             {
                 buf[Position.X + 1 + i, Position.Y] = Label[i];
             }
+
+            foreach (var c in Children)
+                c.Draw(buf);
         }
 
         public Frame(Symbol[] label, ConsoleColor border, Vec2I size)

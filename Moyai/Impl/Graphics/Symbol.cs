@@ -30,7 +30,7 @@ namespace Moyai.Impl.Graphics
         public static Symbol[] Text(string text, Func<int, ConsoleColor> f)
         {
             var symbols = new Symbol[text.Length];
-            for (int i = text.Length; i < text.Length;)
+            for (int i = 0; i < text.Length; i++)
             {
                 symbols[i] = new(text[i], f(i));
             }

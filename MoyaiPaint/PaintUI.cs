@@ -23,10 +23,10 @@ namespace MoyaiPaint
 					new ExpandingSelection(
 					Symbol.Text("File", new Moyai.Impl.ConsoleColor((255, 255, 255), (0, 0, 0))), ["New", "Close"], (s) => { }, new(0))
 				]);
-				
-				//+ new Window("Test", new(20, 7)) { Position = new(2) };
 
-			(var window, var uihandle) = UI.CreateDialogue("test", new(20, 7));
+			//+ new Window("Test", new(20, 7)) { Position = new(2) };
+
+			(var window, var uihandle) = UI.FileSelectDialogue(new(40, 20), @"C:\");
 		}
 	}
 }

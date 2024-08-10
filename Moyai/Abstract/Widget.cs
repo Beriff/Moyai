@@ -27,9 +27,9 @@ namespace Moyai.Abstract
 		public virtual bool Hovered { get => _Hovered; set => _Hovered = value; }
 		public int ZLayer { get; set; }
 
-		public Action OnHover { get; set; } = () => { };
-		public Action OnHoverEnd { get; set; } = () => { };
-		public Action OnClick { get; set; } = () => { };
+		public Action<Widget> OnHover { get; set; } = (w) => { };
+		public Action<Widget> OnHoverEnd { get; set; } = (w) => { };
+		public Action<Widget> OnClick { get; set; } = (w) => { };
 
 		public Vec2I AbsoluteSize
 		{
@@ -50,13 +50,13 @@ namespace Moyai.Abstract
 			bool prev_hovered = Hovered;
 			Hovered = Bounds.Contains(InputUI.MousePos());
 			if(!prev_hovered && Hovered) {
-				OnHover();
+				OnHover(this);
 			}
-			else if (prev_hovered && Hovered) { OnHoverEnd(); }
+			else if (prev_hovered && !Hovered) { OnHoverEnd(this); }
 
 			if(Hovered && InputUI.KeyState(Keys.MouseLeft) == InputType.JustReleased)
 			{
-				OnClick();
+				OnClick(this);
 			}
 		}
 		public abstract void Draw(ConsoleBuffer buf);
@@ -70,7 +70,7 @@ namespace Moyai.Abstract
 			Size = size;
 			RelativeSize = relsize;
 
-			OnClick = () => { if (this is IFocusable) { (this as IFocusable).Focused = !(this as IFocusable).Focused; } };
+			OnClick = (w) => { if (w is IFocusable) { (w as IFocusable).Focused = !(w as IFocusable).Focused; } };
 		}
 	}
 
@@ -82,6 +82,11 @@ namespace Moyai.Abstract
 		public virtual void AddChild(Widget child)
 		{
 			Children.Add(child);
+		}
+
+		public virtual void RemoveChild(Widget child)
+		{
+			Children.Remove(child);
 		}
 
 		public override Vec2I Position 
