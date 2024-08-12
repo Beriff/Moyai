@@ -74,13 +74,11 @@ namespace Moyai.Abstract
 		}
 	}
 
-	public abstract class ContainerWidget : Widget, IFocusable
+	public abstract class ContainerWidget : Widget, IFocusable, IDelayableActionHolder
 	{
 		public virtual List<Widget> Children { get; private set; }
 		public bool Focused { get; set; }
-		protected List<Action> QueuedChildActions { get; private set; } = new();
-
-		public void QueueChildAction(Action a) { QueuedChildActions.Add(a); }
+		public List<Action> ActionQueue { get; private set; } = new();
 
 		public virtual void AddChild(Widget child)
 		{
@@ -108,8 +106,8 @@ namespace Moyai.Abstract
 		{
 			if (!Active) return;
 
-			foreach(var action in QueuedChildActions) { action(); }
-			QueuedChildActions.Clear();
+			foreach(var action in ActionQueue) { action(); }
+			ActionQueue.Clear();
 			foreach(var child in Children) { child.Update(); }
 			base.Update();
 		}

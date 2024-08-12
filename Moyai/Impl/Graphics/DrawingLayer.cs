@@ -5,13 +5,15 @@ using Moyai.Impl.Math;
 
 namespace Moyai.Impl.Graphics
 {
-	public class DrawingLayer
+	public class DrawingLayer : IDelayableActionHolder
 	{
 		public ConsoleBuffer Buffer { get; set; }
 		public List<IDrawable> Drawables { get; set; }
+		public List<Action> ActionQueue { get; set; } = new();
 
 		public (Window, InputConsumer) CreateDialogue(string label, Vec2I size)
 		{
+
 			var w = new Window(label, size);
 			Drawables.Add(w);
 			
@@ -29,11 +31,25 @@ namespace Moyai.Impl.Graphics
 			return (w, c);
 		}
 
-		public (Window, InputConsumer) FileSelectDialogue(Vec2I size, string path, string? ext = null)
+		public (Window, InputConsumer) FileSelectDialogue(Vec2I size, string path, Action<string> callback, string? ext = null)
 		{
+			string? selectedFile = null;
+
 			// Create the basic window to hold the file select dialogue
 			var w = new Window("Select file", size);
 			Drawables.Add(w);
+			var last = Drawables.Count;
+			w.OnClick = (self) =>
+			{
+				if (self.InputUI.MousePos().Equals(
+					self.Position + new Vec2I(self.AbsoluteSize.X - 3, 0)
+					)
+				)
+				{
+					InputBus.RemoveConsumer(self.InputUI);
+					ActionQueue.Add(() => { Drawables.RemoveAt(last - 1); });
+				}
+			};
 
 			// Create a new input consumer that blocks input propogation to layers below
 			var c = new InputConsumer(w.Name + "_input", InputBus.HigherPriority("UI"))
@@ -47,7 +63,19 @@ namespace Moyai.Impl.Graphics
 			w.AddChild(scroll);
 
 			w.AddChild(new Button("Select", new((255, 255, 255)), new((127, 127, 127)), new(8, 1))
-			{ Position = size - new Vec2I(10, 1), InputUI = c });
+			{ 
+				Position = size - new Vec2I(10, 1),
+				InputUI = c,
+				OnClick = (w) =>
+				{
+					if(selectedFile != null)
+					{
+						InputBus.RemoveConsumer(c);
+						ActionQueue.Add(() => { Drawables.RemoveAt(last - 1); });
+						callback(selectedFile);
+					}
+				}
+			});
 
 			// Vertical list to align items automatically
 			var list = new VerticalList(new(1), padding: 0) { InputUI = c };
@@ -73,7 +101,7 @@ namespace Moyai.Impl.Graphics
 			// a function that populates the vertical list with files/dirs from dirname
 			void populate(string dirname)
 			{
-				list.QueueChildAction(() => list.AddChild(
+				list.ActionQueue.Add(() => list.AddChild(
 					new Label(
 						new Symbol[] { new Symbol('*', new((255, 255, 255), (0, 0, 0))) }.Concat(Symbol.Text("..")).ToArray(),
 						new(1))
@@ -86,7 +114,7 @@ namespace Moyai.Impl.Graphics
 					if (fa.HasFlag(FileAttributes.Directory))
 					{
 						q = new Symbol('*', new((255, 255, 255), (0, 0, 0)));
-						list.QueueChildAction(() => list.AddChild(
+						list.ActionQueue.Add(() => list.AddChild(
 						new Label(
 							new Symbol[] { q }.Concat(Symbol.Text(" " + new DirectoryInfo(s).Name)).ToArray(),
 						new(1))
@@ -95,12 +123,19 @@ namespace Moyai.Impl.Graphics
 					}
 					else
 					{
+						if (ext != null && Path.GetExtension(s) != ext) continue;
+
 						q = new Symbol('F', new((255, 255, 255), (0, 0, 0)));
-						list.QueueChildAction(() => list.AddChild(
+						string filename = s == selectedFile ? $"[{Path.GetFileName(s)}]" : Path.GetFileName(s);
+						list.ActionQueue.Add(() => list.AddChild(
 						new Label(
-							new Symbol[] { q }.Concat(Symbol.Text(" " + Path.GetFileName(s))).ToArray(),
+							new Symbol[] { q }.Concat(Symbol.Text(" " + filename)).ToArray(),
 						new(1))
-						{ InputUI = c, OnHover = hovertoggle, OnHoverEnd = hovertoggle }
+						{ 
+							InputUI = c, 
+							OnHover = hovertoggle, 
+							OnHoverEnd = hovertoggle, 
+							OnClick = new Action<Widget>((w) => { selectedFile = s; }) + ondirclick(dirname) }
 					));
 					}
 				}
@@ -112,8 +147,8 @@ namespace Moyai.Impl.Graphics
 
 				return (Widget self) => {
 					scroll.Scroll = 0;
-					list.QueueChildAction(() => list.Children.Clear());
-					list.QueueChildAction(() => list.AddChild(new Label(Symbol.Text($"[{dirname}]"), new(1)) { InputUI = c }));
+					list.ActionQueue.Add(() => list.Children.Clear());
+					list.ActionQueue.Add(() => list.AddChild(new Label(Symbol.Text($"[{dirname}]"), new(1)) { InputUI = c }));
 					populate(dirname);
 
 				};
@@ -127,7 +162,9 @@ namespace Moyai.Impl.Graphics
 
 		public void Update()
 		{
-			foreach(var d in Drawables)
+			foreach (var act in ActionQueue) { act(); }
+			ActionQueue.Clear();
+			foreach (var d in Drawables)
 			{
 				if(d is Widget widget)
 					widget.Update();

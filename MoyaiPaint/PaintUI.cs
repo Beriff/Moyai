@@ -26,7 +26,7 @@ namespace MoyaiPaint
 
 			//+ new Window("Test", new(20, 7)) { Position = new(2) };
 
-			(var window, var uihandle) = UI.FileSelectDialogue(new(40, 20), @"C:\");
+			(var window, var uihandle) = UI.FileSelectDialogue(new(40, 20), @"C:\", (s) => { Console.Title = $"MoyaiPaint // {s}"; });
 		}
 	}
 }
