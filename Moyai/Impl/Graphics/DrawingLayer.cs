@@ -51,12 +51,6 @@ namespace Moyai.Impl.Graphics
 			scroll.AddChild(list);
 
 			list.AddChild(new Label(Symbol.Text($"[{path}]"), new(1)) { InputUI = c });
-			list.AddChild(
-				new Label(
-					new Symbol[] { new Symbol('D', new((255, 255, 255), (0, 0, 0))) }.Concat(Symbol.Text("..")).ToArray(), 
-					new(1))
-				{ InputUI = c }
-				);
 
 			Action<Widget> hovertoggle = (Widget self) =>
 			{
@@ -70,31 +64,54 @@ namespace Moyai.Impl.Graphics
 					);
 			};
 
-			foreach(var s in Directory.GetFileSystemEntries(path))
+			void populate(string dirname)
 			{
-				FileAttributes fa = File.GetAttributes(s);
-				Symbol q;
-				if (fa.HasFlag(FileAttributes.Directory))
-				{
-					q = new Symbol('D', new((255, 255, 255), (0, 0, 0)));
-					list.AddChild(
+				list.QueueChildAction(() => list.AddChild(
 					new Label(
-						new Symbol[] { q }.Concat(Symbol.Text(" " + new DirectoryInfo(s).Name)).ToArray(),
-					new(1))
-					{ InputUI = c, OnHover = hovertoggle, OnHoverEnd = hovertoggle }
-				);
-				}
-				else
+						new Symbol[] { new Symbol('*', new((255, 255, 255), (0, 0, 0))) }.Concat(Symbol.Text("..")).ToArray(),
+						new(1))
+					{ InputUI = c,OnHover = hovertoggle, OnHoverEnd = hovertoggle, OnClick = (w) => { ondirclick(Directory.GetParent(dirname).FullName); } }
+					));
+				foreach (var s in Directory.GetFileSystemEntries(dirname))
 				{
-					q = new Symbol('F', new((255, 255, 255), (0, 0, 0)));
-					list.AddChild(
-					new Label(
-						new Symbol[] { q }.Concat(Symbol.Text(" " + Path.GetFileName(s))).ToArray(),
-					new(1))
-					{ InputUI = c, OnHover = hovertoggle, OnHoverEnd = hovertoggle }
-				);
+					FileAttributes fa = File.GetAttributes(s);
+					Symbol q;
+					if (fa.HasFlag(FileAttributes.Directory))
+					{
+						q = new Symbol('*', new((255, 255, 255), (0, 0, 0)));
+						list.QueueChildAction(() => list.AddChild(
+						new Label(
+							new Symbol[] { q }.Concat(Symbol.Text(" " + new DirectoryInfo(s).Name)).ToArray(),
+						new(1))
+						{ InputUI = c, OnHover = hovertoggle, OnHoverEnd = hovertoggle, OnClick = ondirclick(Path.Join(dirname, new DirectoryInfo(s).Name) ) }
+					));
+					}
+					else
+					{
+						q = new Symbol('F', new((255, 255, 255), (0, 0, 0)));
+						list.QueueChildAction(() => list.AddChild(
+						new Label(
+							new Symbol[] { q }.Concat(Symbol.Text(" " + Path.GetFileName(s))).ToArray(),
+						new(1))
+						{ InputUI = c, OnHover = hovertoggle, OnHoverEnd = hovertoggle }
+					));
+					}
 				}
 			}
+
+			Action<Widget> ondirclick(string dirname) {
+
+				return (Widget self) => {
+					scroll.Scroll = 0;
+					list.QueueChildAction(() => list.Children.Clear());
+					list.QueueChildAction(() => list.AddChild(new Label(Symbol.Text($"[{dirname}]"), new(1)) { InputUI = c }));
+					populate(dirname);
+
+				};
+
+			}
+
+			populate(path);
 
 			return (w, c);
 		}

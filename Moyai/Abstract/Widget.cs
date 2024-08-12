@@ -78,6 +78,9 @@ namespace Moyai.Abstract
 	{
 		public virtual List<Widget> Children { get; private set; }
 		public bool Focused { get; set; }
+		protected List<Action> QueuedChildActions { get; private set; } = new();
+
+		public void QueueChildAction(Action a) { QueuedChildActions.Add(a); }
 
 		public virtual void AddChild(Widget child)
 		{
@@ -105,6 +108,8 @@ namespace Moyai.Abstract
 		{
 			if (!Active) return;
 
+			foreach(var action in QueuedChildActions) { action(); }
+			QueuedChildActions.Clear();
 			foreach(var child in Children) { child.Update(); }
 			base.Update();
 		}
