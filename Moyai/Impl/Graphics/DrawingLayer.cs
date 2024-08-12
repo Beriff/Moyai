@@ -31,46 +31,53 @@ namespace Moyai.Impl.Graphics
 
 		public (Window, InputConsumer) FileSelectDialogue(Vec2I size, string path, string? ext = null)
 		{
+			// Create the basic window to hold the file select dialogue
 			var w = new Window("Select file", size);
 			Drawables.Add(w);
 
+			// Create a new input consumer that blocks input propogation to layers below
 			var c = new InputConsumer(w.Name + "_input", InputBus.HigherPriority("UI"))
 			{ Blocking = true };
 			InputBus.AddConsumer("UI", c);
 			w.InputUI = c;
 
-			//w.AddChild()
-
+			// Create a scrolling frame with no borders to hold a list of files and dirs
 			var scroll = ScrollFrame.NoFrame(size - new Vec2I(1), new(1));
 			scroll.InputUI = c;
 			w.AddChild(scroll);
+
 			w.AddChild(new Button("Select", new((255, 255, 255)), new((127, 127, 127)), new(8, 1))
 			{ Position = size - new Vec2I(10, 1), InputUI = c });
 
+			// Vertical list to align items automatically
 			var list = new VerticalList(new(1), padding: 0) { InputUI = c };
 			scroll.AddChild(list);
 
+			// Current directory indicator
 			list.AddChild(new Label(Symbol.Text($"[{path}]"), new(1)) { InputUI = c });
 
-			Action<Widget> hovertoggle = (Widget self) =>
+			// a function that highlights hovered file/dir
+			void hovertoggle(Widget self)
 			{
 				var l = self as Label;
 				l.Text = Symbol.Text(
 					Symbol.StringFromText(l.Text),
 					(i) =>
 						{
-							return new ConsoleColor((255,255,255)) - l.Text[i].Color;
+							// invert fg and bg
+							return new ConsoleColor((255, 255, 255)) - l.Text[i].Color;
 						}
 					);
-			};
+			}
 
+			// a function that populates the vertical list with files/dirs from dirname
 			void populate(string dirname)
 			{
 				list.QueueChildAction(() => list.AddChild(
 					new Label(
 						new Symbol[] { new Symbol('*', new((255, 255, 255), (0, 0, 0))) }.Concat(Symbol.Text("..")).ToArray(),
 						new(1))
-					{ InputUI = c,OnHover = hovertoggle, OnHoverEnd = hovertoggle, OnClick = (w) => { ondirclick(Directory.GetParent(dirname).FullName); } }
+					{ InputUI = c,OnHover = hovertoggle, OnHoverEnd = hovertoggle, OnClick = ondirclick(Path.GetFullPath(Path.Join(dirname, ".."))) }
 					));
 				foreach (var s in Directory.GetFileSystemEntries(dirname))
 				{
@@ -99,6 +106,8 @@ namespace Moyai.Impl.Graphics
 				}
 			}
 
+			// a function that creates an OnClick callback, that updates the dialogue
+			// based on what directory you clicked
 			Action<Widget> ondirclick(string dirname) {
 
 				return (Widget self) => {
