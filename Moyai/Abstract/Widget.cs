@@ -15,7 +15,7 @@ namespace Moyai.Abstract
 		protected Vec2I _Size;
 		protected bool _Hovered;
 
-		public InputConsumer InputUI { get; set; } = InputBus.Consumer("UI", "Master");
+		public InputConsumer LocalInput { get; set; } = InputBus.Consumer("UI", "Master");
 		public virtual Widget? Parent { get => _Parent; set => _Parent = value; }
 		public virtual bool Active { get => _Active; set => _Active = value; }
 		public virtual bool Visible { get => _Visible; set => _Visible = value; }
@@ -48,13 +48,13 @@ namespace Moyai.Abstract
 			if (!Active) return;
 
 			bool prev_hovered = Hovered;
-			Hovered = Bounds.Contains(InputUI.MousePos());
+			Hovered = Bounds.Contains(LocalInput.MousePos());
 			if(!prev_hovered && Hovered) {
 				OnHover(this);
 			}
 			else if (prev_hovered && !Hovered) { OnHoverEnd(this); }
 
-			if(Hovered && InputUI.KeyState(Keys.MouseLeft) == InputType.JustReleased)
+			if(Hovered && LocalInput.KeyState(Keys.MouseLeft) == InputType.JustReleased)
 			{
 				OnClick(this);
 			}

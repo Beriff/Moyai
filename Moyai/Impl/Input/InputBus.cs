@@ -12,6 +12,24 @@ namespace Moyai.Impl.Input
 		public string Name {  get; set; }
 		public bool Blocking { get; set; }
 		public bool InputReceived { get; set; }
+		public IEnumerable<Keys> PressedKeys
+		{
+			get
+			{
+				foreach(Keys key in Enum.GetValues(typeof(Keys)).Cast<Keys>())
+				{
+					if(KeyPressed(key)) yield return key;
+				}
+			}
+		}
+
+		public IEnumerable<Keys> KeysOfState(InputType t)
+		{
+			foreach(Keys key in Enum.GetValues(typeof(Keys)).Cast<Keys>())
+			{
+				if(KeyState(key) == t) yield return key;
+			}
+		}
 
 		public InputConsumer(string name, int priority)
 		{

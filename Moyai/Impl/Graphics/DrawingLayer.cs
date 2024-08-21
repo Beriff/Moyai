@@ -9,154 +9,158 @@ namespace Moyai.Impl.Graphics
 	{
 		public ConsoleBuffer Buffer { get; set; }
 		public List<IDrawable> Drawables { get; set; }
-		public List<Action> ActionQueue { get; set; } = new();
+		public List<Action> ActionQueue { get; set; } = [];
 
 		public (Window, InputConsumer) CreateDialogue(string label, Vec2I size)
 		{
-
 			var w = new Window(label, size);
-			Drawables.Add(w);
-			
-			var c = new InputConsumer(w.Name + "_input", InputBus.HigherPriority("UI"))
-			{ Blocking = true };
-			InputBus.AddConsumer("UI", c);
+			var c = new InputConsumer(w.Name + "_input", InputBus.HigherPriority("UI")) { Blocking = true };
 
-			w.OnClose = () =>
+			ActionQueue.Add(() =>
 			{
-				Drawables.Remove(w);
-				InputBus.RemoveConsumer(c);
-			};
+				Drawables.Add(w);
+				InputBus.AddConsumer("UI", c);
 
-			w.InputUI = c;
+				w.OnClose = () =>
+				{
+					Drawables.Remove(w);
+					InputBus.RemoveConsumer(c);
+				};
+
+				w.LocalInput = c;
+			});
+
 			return (w, c);
 		}
 
 		public (Window, InputConsumer) FileSelectDialogue(Vec2I size, string path, Action<string> callback, string? ext = null)
 		{
-			string? selectedFile = null;
-
 			// Create the basic window to hold the file select dialogue
 			var w = new Window("Select file", size);
-			Drawables.Add(w);
-			var last = Drawables.Count;
-			w.OnClick = (self) =>
-			{
-				if (self.InputUI.MousePos().Equals(
-					self.Position + new Vec2I(self.AbsoluteSize.X - 3, 0)
-					)
-				)
-				{
-					InputBus.RemoveConsumer(self.InputUI);
-					ActionQueue.Add(() => { Drawables.RemoveAt(last - 1); });
-				}
-			};
 
 			// Create a new input consumer that blocks input propogation to layers below
 			var c = new InputConsumer(w.Name + "_input", InputBus.HigherPriority("UI"))
 			{ Blocking = true };
-			InputBus.AddConsumer("UI", c);
-			w.InputUI = c;
 
-			// Create a scrolling frame with no borders to hold a list of files and dirs
-			var scroll = ScrollFrame.NoFrame(size - new Vec2I(1), new(1));
-			scroll.InputUI = c;
-			w.AddChild(scroll);
+			ActionQueue.Add(() => {
+				string? selectedFile = null;
 
-			w.AddChild(new Button("Select", new((255, 255, 255)), new((127, 127, 127)), new(8, 1))
-			{ 
-				Position = size - new Vec2I(10, 1),
-				InputUI = c,
-				OnClick = (w) =>
+				Drawables.Add(w);
+				var last = Drawables.Count;
+				w.OnClick = (self) =>
 				{
-					if(selectedFile != null)
+					if (self.LocalInput.MousePos().Equals(
+						self.Position + new Vec2I(self.AbsoluteSize.X - 3, 0)
+						)
+					)
 					{
-						InputBus.RemoveConsumer(c);
+						InputBus.RemoveConsumer(self.LocalInput);
 						ActionQueue.Add(() => { Drawables.RemoveAt(last - 1); });
-						callback(selectedFile);
 					}
-				}
-			});
-
-			// Vertical list to align items automatically
-			var list = new VerticalList(new(1), padding: 0) { InputUI = c };
-			scroll.AddChild(list);
-
-			// Current directory indicator
-			list.AddChild(new Label(Symbol.Text($"[{path}]"), new(1)) { InputUI = c });
-
-			// a function that highlights hovered file/dir
-			void hovertoggle(Widget self)
-			{
-				var l = self as Label;
-				l.Text = Symbol.Text(
-					Symbol.StringFromText(l.Text),
-					(i) =>
-						{
-							// invert fg and bg
-							return new ConsoleColor((255, 255, 255)) - l.Text[i].Color;
-						}
-					);
-			}
-
-			// a function that populates the vertical list with files/dirs from dirname
-			void populate(string dirname)
-			{
-				list.ActionQueue.Add(() => list.AddChild(
-					new Label(
-						new Symbol[] { new Symbol('*', new((255, 255, 255), (0, 0, 0))) }.Concat(Symbol.Text("..")).ToArray(),
-						new(1))
-					{ InputUI = c,OnHover = hovertoggle, OnHoverEnd = hovertoggle, OnClick = ondirclick(Path.GetFullPath(Path.Join(dirname, ".."))) }
-					));
-				foreach (var s in Directory.GetFileSystemEntries(dirname))
-				{
-					FileAttributes fa = File.GetAttributes(s);
-					Symbol q;
-					if (fa.HasFlag(FileAttributes.Directory))
-					{
-						q = new Symbol('*', new((255, 255, 255), (0, 0, 0)));
-						list.ActionQueue.Add(() => list.AddChild(
-						new Label(
-							new Symbol[] { q }.Concat(Symbol.Text(" " + new DirectoryInfo(s).Name)).ToArray(),
-						new(1))
-						{ InputUI = c, OnHover = hovertoggle, OnHoverEnd = hovertoggle, OnClick = ondirclick(Path.Join(dirname, new DirectoryInfo(s).Name) ) }
-					));
-					}
-					else
-					{
-						if (ext != null && Path.GetExtension(s) != ext) continue;
-
-						q = new Symbol('F', new((255, 255, 255), (0, 0, 0)));
-						string filename = s == selectedFile ? $"[{Path.GetFileName(s)}]" : Path.GetFileName(s);
-						list.ActionQueue.Add(() => list.AddChild(
-						new Label(
-							new Symbol[] { q }.Concat(Symbol.Text(" " + filename)).ToArray(),
-						new(1))
-						{ 
-							InputUI = c, 
-							OnHover = hovertoggle, 
-							OnHoverEnd = hovertoggle, 
-							OnClick = new Action<Widget>((w) => { selectedFile = s; }) + ondirclick(dirname) }
-					));
-					}
-				}
-			}
-
-			// a function that creates an OnClick callback, that updates the dialogue
-			// based on what directory you clicked
-			Action<Widget> ondirclick(string dirname) {
-
-				return (Widget self) => {
-					scroll.Scroll = 0;
-					list.ActionQueue.Add(() => list.Children.Clear());
-					list.ActionQueue.Add(() => list.AddChild(new Label(Symbol.Text($"[{dirname}]"), new(1)) { InputUI = c }));
-					populate(dirname);
-
 				};
 
-			}
+				InputBus.AddConsumer("UI", c);
+				w.LocalInput = c;
 
-			populate(path);
+				// Create a scrolling frame with no borders to hold a list of files and dirs
+				var scroll = ScrollFrame.NoFrame(size - new Vec2I(1), new(1));
+				scroll.LocalInput = c;
+				w.AddChild(scroll);
 
+				w.AddChild(new Button("Select", new((255, 255, 255)), new((127, 127, 127)), new(8, 1))
+				{
+					Position = size - new Vec2I(10, 1),
+					LocalInput = c,
+					OnClick = (w) =>
+					{
+						if (selectedFile != null)
+						{
+							InputBus.RemoveConsumer(c);
+							ActionQueue.Add(() => { Drawables.RemoveAt(last - 1); });
+							callback(selectedFile);
+						}
+					}
+				});
+
+				// Vertical list to align items automatically
+				var list = new VerticalList(new(1), padding: 0) { LocalInput = c };
+				scroll.AddChild(list);
+
+				// Current directory indicator
+				list.AddChild(new Label(Symbol.Text($"[{path}]"), w.Position + new Vec2I(1)) { LocalInput = c });
+
+				// a function that highlights hovered file/dir
+				void hovertoggle(Widget self)
+				{
+					var l = self as Label;
+					l.Text = Symbol.Text(
+						Symbol.StringFromText(l.Text),
+						(i) =>
+							{
+								// invert fg and bg
+								return new ConsoleColor((255, 255, 255)) - l.Text[i].Color;
+							}
+						);
+				}
+
+				// a function that populates the vertical list with files/dirs from dirname
+				void populate(string dirname)
+				{
+					list.ActionQueue.Add(() => list.AddChild(
+						new Label(
+							new Symbol[] { new Symbol('*', new((255, 255, 255), (0, 0, 0))) }.Concat(Symbol.Text("..")).ToArray(),
+							w.Position + new Vec2I(1))
+						{ LocalInput = c, OnHover = hovertoggle, OnHoverEnd = hovertoggle, OnClick = ondirclick(Path.GetFullPath(Path.Join(dirname, ".."))) }
+						));
+					foreach (var s in Directory.GetFileSystemEntries(dirname))
+					{
+						FileAttributes fa = File.GetAttributes(s);
+						Symbol q;
+						if (fa.HasFlag(FileAttributes.Directory))
+						{
+							q = new Symbol('*', new((255, 255, 255), (0, 0, 0)));
+							list.ActionQueue.Add(() => list.AddChild(
+							new Label(
+								new Symbol[] { q }.Concat(Symbol.Text(" " + new DirectoryInfo(s).Name)).ToArray(),
+							w.Position + new Vec2I(1))
+							{ LocalInput = c, OnHover = hovertoggle, OnHoverEnd = hovertoggle, OnClick = ondirclick(Path.Join(dirname, new DirectoryInfo(s).Name)) }
+						));
+						}
+						else
+						{
+							if (ext != null && Path.GetExtension(s) != ext) continue;
+
+							q = new Symbol('F', new((255, 255, 255), (0, 0, 0)));
+							string filename = s == selectedFile ? $"[{Path.GetFileName(s)}]" : Path.GetFileName(s);
+							list.ActionQueue.Add(() => list.AddChild(
+							new Label(
+								new Symbol[] { q }.Concat(Symbol.Text(" " + filename)).ToArray(),
+							w.Position + new Vec2I(1))
+							{
+								LocalInput = c,
+								OnHover = hovertoggle,
+								OnHoverEnd = hovertoggle,
+								OnClick = new Action<Widget>((w) => { selectedFile = s; }) + ondirclick(dirname) }
+						));
+						}
+					}
+				}
+
+				// a function that creates an OnClick callback, that updates the dialogue
+				// based on what directory you clicked
+				Action<Widget> ondirclick(string dirname) {
+
+					return (Widget self) => {
+						scroll.Scroll = 0;
+						list.ActionQueue.Add(() => list.Children.Clear());
+						list.ActionQueue.Add(() => list.AddChild(new Label(Symbol.Text($"[{dirname}]"), w.Position + new Vec2I(1)) { LocalInput = c }));
+						populate(dirname);
+
+					};
+
+				}
+				populate(path);
+			});
 			return (w, c);
 		}
 

@@ -18,9 +18,9 @@ namespace Moyai.Impl.Graphics.Widgets
 		{
 			base.Update();
 
-			if(InputUI.KeyState(Keys.MouseLeft) == InputType.JustReleased)
+			if(LocalInput.KeyState(Keys.MouseLeft) == InputType.JustReleased)
 			{
-				if(InputUI.MousePos().Equals(new Vec2I(Position.X + AbsoluteSize.X - 3, Position.Y)))
+				if(LocalInput.MousePos().Equals(new Vec2I(Position.X + AbsoluteSize.X - 3, Position.Y)))
 				{
 					OnClose();
 				}
@@ -28,15 +28,15 @@ namespace Moyai.Impl.Graphics.Widgets
 
 			if(Held)
 			{
-				Position += InputUI.MouseDelta;
-				if(InputUI.KeyState(Keys.MouseLeft) == InputType.JustReleased)
+				Position += LocalInput.MouseDelta;
+				if(LocalInput.KeyState(Keys.MouseLeft) == InputType.JustReleased)
 				{
 					Held = false;
 				}
 			}
-			if(InputUI.KeyState(Keys.MouseLeft) == InputType.JustPressed)
+			if(LocalInput.KeyState(Keys.MouseLeft) == InputType.JustPressed)
 			{
-				if(new Rect(Position, new(Position.X+AbsoluteSize.X, Position.Y+2)).Contains(InputUI.MousePos()))
+				if(new Rect(Position, new(Position.X+AbsoluteSize.X, Position.Y+2)).Contains(LocalInput.MousePos()))
 				{
 					Held = true;
 				}

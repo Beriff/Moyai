@@ -41,6 +41,9 @@ namespace Moyai.Impl.Graphics.Widgets
 			{
 				HasExpanded = false;
 			}
+
+			if(HasExpanded && LocalInput.KeyState(Keys.MouseLeft) == InputType.JustReleased && mpos.Y != Position.Y)
+				OnOptionClick(Options[mpos.Y - Position.Y - 1]);
 		}
 
 		public override void Draw(ConsoleBuffer buf)

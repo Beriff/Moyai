@@ -5,14 +5,32 @@ namespace MoyaiPaint
 {
 	public partial class MoyaiPaint
 	{
+		public void OpenFile()
+		{
+			void fileSelected(string filepath)
+			{
+				OpenedFile = Path.GetFileName(filepath);
+			}
+
+			UI.FileSelectDialogue(new(40, 20), @"C:\", fileSelected);
+		}
+
+		public void CreateFile()
+		{
+			(var window, var uihandle) = UI.CreateDialogue("New File", new(40, 20));
+			window.ActionQueue.Add(() => window.AddChild(new InputBox("Size", 10) { Position = new(1, 1), LocalInput = uihandle }));
+		}
+
 		public MoyaiPaint()
 		{
-			var dispatch_file_event = (string @event) =>
+			void dispatch_fileMenu_event(string @event)
 			{
 				switch(@event)
 				{
+					case "New": CreateFile(); break;
+					case "Open": OpenFile(); break;
 				}
-			};
+			}
 
 			OpenedFile = null;
 			UI = new(Main);
@@ -21,12 +39,9 @@ namespace MoyaiPaint
 
 				+ new HorizontalList(new(0), [
 					new ExpandingSelection(
-					Symbol.Text("File", new Moyai.Impl.ConsoleColor((255, 255, 255), (0, 0, 0))), ["New", "Close"], (s) => { }, new(0))
+					Symbol.Text("File", new Moyai.Impl.ConsoleColor((255, 255, 255), (0, 0, 0))),
+					["New", "Open", "Close"], dispatch_fileMenu_event, new(0))
 				]);
-
-			//+ new Window("Test", new(20, 7)) { Position = new(2) };
-
-			(var window, var uihandle) = UI.FileSelectDialogue(new(40, 20), @"C:\", (s) => { Console.Title = $"MoyaiPaint // {s}"; });
 		}
 	}
 }

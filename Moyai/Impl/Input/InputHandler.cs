@@ -367,6 +367,48 @@ namespace Moyai.Impl.Input
 			}
 		}
 
-
+		public static char? LetterKey(Keys key)
+		{
+			return key switch
+			{
+				Keys.A => 'A',
+				Keys.B => 'B',
+				Keys.C => 'C',
+				Keys.D => 'D',
+				Keys.E => 'E',
+				Keys.F => 'F',
+				Keys.G => 'G',
+				Keys.H => 'H',
+				Keys.I => 'I',
+				Keys.J => 'J',
+				Keys.K => 'K',
+				Keys.L => 'L',
+				Keys.M => 'M',
+				Keys.N => 'N',
+				Keys.O => 'O',
+				Keys.P => 'P',
+				Keys.Q => 'Q',
+				Keys.R => 'R',
+				Keys.S => 'S',
+				Keys.T => 'T',
+				Keys.U => 'U',
+				Keys.V => 'V',
+				Keys.W => 'W',
+				Keys.X => 'X',
+				Keys.Y => 'Y',
+				Keys.Z => 'Z',
+				Keys._1 => '1',
+				Keys._2 => '2',
+				Keys._3 => '3',
+				Keys._4 => '4',
+				Keys._5 => '5',
+				Keys._6 => '6',
+				Keys._7 => '7',
+				Keys._8 => '8',
+				Keys._9 => '9',
+				Keys._0 => '0',
+				_ => null
+			};
+		}
 	}
 }
