@@ -85,5 +85,27 @@
 				rhs.Foreground.B / lhs.Foreground.B)
 				);
 		}
+		public static ConsoleColor operator *(ConsoleColor rhs, float lhs)
+		{
+			return new ConsoleColor(
+				((byte R, byte G, byte B))(rhs.Background.R * lhs,
+				rhs.Background.G * lhs,
+				rhs.Background.B * lhs),
+				((byte R, byte G, byte B))(rhs.Foreground.R * lhs,
+				rhs.Foreground.G * lhs,
+				rhs.Foreground.B * lhs)
+				);
+		}
+		public static ConsoleColor operator /(ConsoleColor rhs, float lhs)
+		{
+			return new ConsoleColor(
+				((byte R, byte G, byte B))(rhs.Background.R / lhs,
+				rhs.Background.G / lhs,
+				rhs.Background.B / lhs),
+				((byte R, byte G, byte B))(rhs.Foreground.R / lhs,
+				rhs.Foreground.G / lhs,
+				rhs.Foreground.B / lhs)
+				);
+		}
 	}
 }

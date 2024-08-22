@@ -50,6 +50,7 @@ namespace MoyaiExample
 
 
 			float mult = camspeed * (float)TimeDelta;
+
 			if (InputHandler.KeyPressed(Keys.D))
 				camera.Move(new Vec3F(0, 0, 1) * mult);
 			if (InputHandler.KeyPressed(Keys.A))
@@ -61,8 +62,6 @@ namespace MoyaiExample
 
 			if (!InputHandler.KeyPressed(Keys.Esc))
 				camera.Rotate(new Vec3F(InputHandler.MouseDelta.Y / 25f, 0, InputHandler.MouseDelta.X / 25f) * mult);
-			//if (!InputHandler.KeyPressed(Keys.Esc))
-			//camera.Rotate(new Vec3F(InputHandler.MouseDelta.Y / 15f, 0, 0) * mult);
 
 			base.Update();
 
@@ -73,10 +72,7 @@ namespace MoyaiExample
 		{
 			camera.Buffer.Clear();
 
-
-
 			camera.Render(scene);
-
 
 			// Draw FPS
 			{

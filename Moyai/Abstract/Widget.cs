@@ -57,6 +57,12 @@ namespace Moyai.Abstract
 			if(Hovered && LocalInput.KeyState(Keys.MouseLeft) == InputType.JustReleased)
 			{
 				OnClick(this);
+				if (this is IFocusable)
+					(this as IFocusable).Focused = true;
+			} else if (LocalInput.KeyState(Keys.MouseLeft) == InputType.JustReleased)
+			{
+				if (this is IFocusable)
+					(this as IFocusable).Focused = false;
 			}
 		}
 		public abstract void Draw(ConsoleBuffer buf);
@@ -69,8 +75,6 @@ namespace Moyai.Abstract
 			Position = position;
 			Size = size;
 			RelativeSize = relsize;
-
-			OnClick = (w) => { if (w is IFocusable) { (w as IFocusable).Focused = !(w as IFocusable).Focused; } };
 		}
 	}
 
@@ -78,7 +82,7 @@ namespace Moyai.Abstract
 	{
 		public virtual List<Widget> Children { get; private set; }
 		public bool Focused { get; set; }
-		public List<Action> ActionQueue { get; private set; } = new();
+		public List<Action> ActionQueue { get; private set; } = [];
 
 		public virtual void AddChild(Widget child)
 		{

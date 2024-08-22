@@ -8,6 +8,7 @@ namespace Moyai.Impl.Graphics.Widgets
     {
         public Symbol[] Label { get; set; }
         public ConsoleColor Border { get; set; }
+        public ConsoleColor BorderColor { get => Focused ?  Border / 2 : Border; }
 
         public override void Draw(ConsoleBuffer buf)
         {
@@ -23,37 +24,37 @@ namespace Moyai.Impl.Graphics.Widgets
                     {
                         if (y == Position.Y)
                         {
-							buf[x, y] = new Symbol('┌', Border);
+							buf[x, y] = new Symbol('┌', BorderColor);
 						}  
                         else if (y == Position.Y + size.Y - 1)
                         {
-							buf[x, y] = new Symbol('└', Border);
+							buf[x, y] = new Symbol('└', BorderColor);
 						}  
                         else
                         {
-							buf[x, y] = new Symbol('│', Border);
+							buf[x, y] = new Symbol('│', BorderColor);
 						}                        
 					}
                     else if (x == Position.X + size.X - 1)
                     {
                         if (y == Position.Y)
                         {
-							buf[x, y] = new Symbol('┐', Border);
+							buf[x, y] = new Symbol('┐', BorderColor);
 						}
                         else if (y == Position.Y + size.Y - 1)
                         {
-							buf[x, y] = new Symbol('┘', Border);
+							buf[x, y] = new Symbol('┘', BorderColor);
 						}
                         else
 					    {
-							buf[x, y] = new Symbol('│', Border);
+							buf[x, y] = new Symbol('│', BorderColor);
 						}
 					}
                     else
                     {
 						if (y == Position.Y || y == Position.Y + size.Y - 1)
 					    {
-							buf[x, y] = new Symbol('─', Border);
+							buf[x, y] = new Symbol('─', BorderColor);
 						}
 					}
                 }
