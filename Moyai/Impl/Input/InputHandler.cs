@@ -407,6 +407,7 @@ namespace Moyai.Impl.Input
 				Keys._8 => '8',
 				Keys._9 => '9',
 				Keys._0 => '0',
+				Keys.Space => ' ',
 				_ => null
 			};
 		}

@@ -9,6 +9,11 @@ namespace Moyai.Impl.Graphics.Widgets
 	{
 		protected int _Cursor = 0;
 		public string Text { get; set; }
+		public Predicate<char>? Validate { get; set; }
+		public static Predicate<char> NumericValidator
+		{
+			get => (c) => int.TryParse(c.ToString(), out int _);
+		}
 		public int Cursor { get => _Cursor; set
 			{
 				_Cursor = value;
@@ -41,18 +46,29 @@ namespace Moyai.Impl.Graphics.Widgets
 					case Keys.ArrowRight:
 						Cursor = System.Math.Min(Cursor + 1, Text.Length - 1);
 						break;
+					case Keys.Backspace:
+						if (Text.Length == 0) break;
+						Cursor--;
+						Text = Text[0..^1];
+						break;
 					default:
-						if (InputHandler.LetterKey(key) == null) break;
-						Text = Text.Insert(Cursor, InputHandler.LetterKey(key).ToString());
-						Cursor++;
+						char? k = InputHandler.LetterKey(key);
+						if (k == null) break;
+						string s = k.ToString()!;
+						if(Validate == null || (Validate != null && Validate((char)k)) )
+						{
+							Text = Text.Insert(Cursor, s!);
+							Cursor++;
+						}
 						break;
 				}
 			}
 		}
-		public InputBox(string label, int size) 
+		public InputBox(string label, int size, Predicate<char>? validate = null)
 			: base(Symbol.Text(label), ConsoleColor.Default, new(size, 3))
 		{
 			Text = "";
+			Validate = validate;
 		}
 	}
 }

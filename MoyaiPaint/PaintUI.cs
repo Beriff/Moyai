@@ -18,7 +18,7 @@ namespace MoyaiPaint
 		public void CreateFile()
 		{
 			(var window, var uihandle) = UI.CreateDialogue("New File", new(40, 20));
-			window.ActionQueue.Add(() => window.AddChild(new InputBox("Size", 10) { Position = new(1, 1), LocalInput = uihandle }));
+			window.ActionQueue.Add(() => window.AddChild(new InputBox("Size", 10, InputBox.NumericValidator) { Position = new(1, 1), LocalInput = uihandle }));
 		}
 
 		public MoyaiPaint()
