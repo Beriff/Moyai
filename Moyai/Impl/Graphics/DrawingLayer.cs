@@ -16,7 +16,7 @@ namespace Moyai.Impl.Graphics
 		{
 			var w = new Window(label, size);
 			var c = new InputConsumer(w.Name + "_input", InputBus.HigherPriority("UI")) { Blocking = true };
-
+			w.OnUpdate = (_) => c.Area = w.Bounds;
 			ActionQueue.Add(() =>
 			{
 				Drawables.Add(w);
@@ -55,6 +55,7 @@ namespace Moyai.Impl.Graphics
 			// Create a new input consumer that blocks input propogation to layers below
 			var c = new InputConsumer(w.Name + "_input", InputBus.HigherPriority("UI"))
 			{ Blocking = true };
+			w.OnUpdate = (_) => c.Area = w.Bounds;
 
 			ActionQueue.Add(() => {
 				string? selectedFile = null;
@@ -186,7 +187,7 @@ namespace Moyai.Impl.Graphics
 			// Create a new input consumer that blocks input propogation to layers below
 			var c = new InputConsumer(w.Name + "_input", InputBus.HigherPriority("UI"))
 			{ Blocking = true };
-
+			w.OnUpdate = (_) => c.Area = w.Bounds;
 
 			InputBus.AddConsumer("UI", c);
 			w.LocalInput = c;
@@ -288,7 +289,11 @@ namespace Moyai.Impl.Graphics
 				return (Widget self) => {
 					scroll.Scroll = 0;
 					list.ActionQueue.Add(() => list.Children.Clear());
-					list.ActionQueue.Add(() => list.AddChild(new Label(Symbol.Text($"[{dirname}]"), w.Position + new Vec2I(1)) { LocalInput = c }));
+					list.ActionQueue.Add(
+						() => list.AddChild(
+							new Label(Symbol.Text($"[{dirname}]"), w.Position + new Vec2I(1)) 
+							{ LocalInput = c, Name = "current_dir" })
+						);
 					populate(dirname);
 
 				};

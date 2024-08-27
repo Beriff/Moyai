@@ -12,6 +12,8 @@ namespace Moyai.Impl.Input
 		public string Name {  get; set; }
 		public bool Blocking { get; set; }
 		public bool InputReceived { get; set; }
+		public Rect? Area { get; set; }
+		public bool MouseAvailable { get => Area == null || Area.Contains(InputHandler.MousePos()); }
 		public IEnumerable<Keys> PressedKeys
 		{
 			get
@@ -57,7 +59,7 @@ namespace Moyai.Impl.Input
 
 		public Vec2I MousePos()
 		{
-			if (InputReceived)
+			if (InputReceived && MouseAvailable)
 				return InputHandler.MousePos();
 			else
 				return new(-1);
@@ -65,7 +67,7 @@ namespace Moyai.Impl.Input
 
 		public Vec2I MousePos(ConsoleBuffer buf)
 		{
-			if (InputReceived)
+			if (InputReceived && MouseAvailable)
 				return InputHandler.MousePos(buf);
 			else
 				return new(-1);
