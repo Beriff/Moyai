@@ -1,5 +1,5 @@
-﻿using Moyai.Impl.Graphics.Widgets;
-using Moyai.Impl.Graphics;
+﻿using Moyai.Impl.Graphics;
+using Moyai.Impl.Graphics.Widgets;
 
 namespace MoyaiPaint
 {
@@ -17,15 +17,28 @@ namespace MoyaiPaint
 
 		public void CreateFile()
 		{
-			(var window, var uihandle) = UI.CreateDialogue("New File", new(40, 20));
-			window.ActionQueue.Add(() => window.AddChild(new InputBox("Size", 10, InputBox.NumericValidator) { Position = new(1, 1), LocalInput = uihandle }));
+			(var window, var input_handle) = UI.CreateDialogue("New File", new(40, 20),
+				["OK"], (self, _) => { self.CloseAsDialogue(UI)(); });
+
+			window.ActionQueue.Add(() =>
+			{
+				window.AddChild(
+					new InputBox("Width", 10, InputBox.NumericValidator)
+					{ Position = new(1, 1), LocalInput = input_handle },
+
+					new InputBox("Height", 10, InputBox.NumericValidator)
+					{ Position = new(12, 1), LocalInput = input_handle }
+
+					);
+			});
+
 		}
 
 		public MoyaiPaint()
 		{
 			void dispatch_fileMenu_event(string @event)
 			{
-				switch(@event)
+				switch (@event)
 				{
 					case "New": CreateFile(); break;
 					case "Open": OpenFile(); break;

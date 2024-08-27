@@ -9,6 +9,17 @@ namespace Moyai.Impl.Graphics.Widgets
 	{
 		public Action OnClose { get; set; } = () => { };
 		protected bool Held { get; set; }
+		public Action CloseAsDialogue(DrawingLayer dl) => () =>
+		{
+			dl.ActionQueue.Add(() =>
+			{
+				dl.Drawables.Remove(this);
+			});
+			ActionQueue.Add(() =>
+			{
+				InputBus.RemoveConsumer(LocalInput);
+			});
+		};
 		public override void Draw(ConsoleBuffer buf)
 		{
 			base.Draw(buf);
@@ -42,6 +53,20 @@ namespace Moyai.Impl.Graphics.Widgets
 				}
 			}
 		}
+
+		public void PositionActionButtons(params Button[] buttons)
+		{
+			int dist = 0;
+			foreach(var button in buttons)
+			{
+				AddChild(button);
+				button.LocalInput = LocalInput;
+				button.Position = new(Position.X + AbsoluteSize.X - button.Size.X - 1 - dist, 
+					Position.Y + AbsoluteSize.Y - 1);
+				dist = button.Position.X;
+			}
+		}
+
 		public Window(string label, Vec2I size)
 			: base(Symbol.Text(label), ConsoleColor.Default, size)
 		{

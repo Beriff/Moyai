@@ -11,7 +11,8 @@ namespace Moyai.Impl.Graphics
 		public List<IDrawable> Drawables { get; set; }
 		public List<Action> ActionQueue { get; set; } = [];
 
-		public (Window, InputConsumer) CreateDialogue(string label, Vec2I size)
+		public (Window, InputConsumer) CreateDialogue(string label, Vec2I size, string[] options, 
+			Action<Window, string> dispatcher)
 		{
 			var w = new Window(label, size);
 			var c = new InputConsumer(w.Name + "_input", InputBus.HigherPriority("UI")) { Blocking = true };
@@ -21,13 +22,26 @@ namespace Moyai.Impl.Graphics
 				Drawables.Add(w);
 				InputBus.AddConsumer("UI", c);
 
+				List<Button> buttons = [];
+				foreach(var option in options)
+				{
+					buttons.Add(new Button("OK", new((255, 255, 255)), new((127, 127, 127)), new(4, 1))
+					{ OnClick = (_) => dispatcher(w, option)});
+				}
+				w.LocalInput = c;
+				w.PositionActionButtons([..buttons]);
+				
+
 				w.OnClose = () =>
 				{
-					Drawables.Remove(w);
-					InputBus.RemoveConsumer(c);
+					w.ActionQueue.Add(() =>
+					{
+						Drawables.Remove(w);
+						InputBus.RemoveConsumer(c);
+					});
 				};
 
-				w.LocalInput = c;
+				
 			});
 
 			return (w, c);

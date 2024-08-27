@@ -89,6 +89,11 @@ namespace Moyai.Abstract
 			Children.Add(child);
 		}
 
+		public virtual void AddChild(params Widget[] children)
+		{
+			foreach(var child in children) AddChild(child);
+		}
+
 		public virtual void RemoveChild(Widget child)
 		{
 			Children.Remove(child);
