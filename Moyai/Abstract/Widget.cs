@@ -22,7 +22,7 @@ namespace Moyai.Abstract
 		public virtual Vec2I Position { get => _Position; set => _Position = value; }
 		public virtual Vec2I Size { get => _Size; set => _Size = value; }
 		public virtual Vec2I RelativeSize { get; set; }
-		public virtual string Name { get => GetHashCode().ToString() + GetType().Name; }
+		public virtual string Name { get; set; }
 		public virtual Rect Bounds { get => new(Position, Position + AbsoluteSize - new Vec2I(1)); }
 		public virtual bool Hovered { get => _Hovered; set => _Hovered = value; }
 		public int ZLayer { get; set; }
@@ -30,6 +30,7 @@ namespace Moyai.Abstract
 		public Action<Widget> OnHover { get; set; } = (w) => { };
 		public Action<Widget> OnHoverEnd { get; set; } = (w) => { };
 		public Action<Widget> OnClick { get; set; } = (w) => { };
+		public Action<Widget> OnUpdate { get; set; } = (w) => { };
 
 		public Vec2I AbsoluteSize
 		{
@@ -64,6 +65,8 @@ namespace Moyai.Abstract
 				if (this is IFocusable)
 					(this as IFocusable).Focused = false;
 			}
+
+			OnUpdate(this);
 		}
 		public abstract void Draw(ConsoleBuffer buf);
 
@@ -75,6 +78,7 @@ namespace Moyai.Abstract
 			Position = position;
 			Size = size;
 			RelativeSize = relsize;
+			Name = GetHashCode().ToString() + GetType().Name;
 		}
 	}
 
@@ -98,6 +102,8 @@ namespace Moyai.Abstract
 		{
 			Children.Remove(child);
 		}
+
+		public Widget GetChild(string name) => Children.Find((x) => x.Name == name);
 
 		public override Vec2I Position 
 		{ 

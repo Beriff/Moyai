@@ -17,8 +17,23 @@ namespace MoyaiPaint
 
 		public void CreateFile()
 		{
-			(var window, var input_handle) = UI.CreateDialogue("New File", new(40, 20),
-				["OK"], (self, _) => { self.CloseAsDialogue(UI)(); });
+			(var window, var input_handle) = UI.CreateDialogue("New File", new(40, 15),
+				["OK", "Cancel"], (self, option) => 
+				{
+					switch(option) {
+						case "Cancel": self.CloseAsDialogue(UI)(); break;
+						case "OK":
+							foreach(var child in self.Children)
+							{
+								if (child is InputBox && (child as InputBox).Empty)
+									return;
+							}
+							self.CloseAsDialogue(UI)();
+							UI.FileCreateDialogue(new(40, 20), @"C:\", "json", (_) => { });
+						
+						break;
+					}
+				});
 
 			window.ActionQueue.Add(() =>
 			{

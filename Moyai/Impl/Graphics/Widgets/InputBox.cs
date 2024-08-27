@@ -28,9 +28,10 @@ namespace Moyai.Impl.Graphics.Widgets
 			int end_i = System.Math.Clamp(Text.Length, 0, Shift + AbsoluteSize.X - 2);
 			base.Draw(buf);
 			buf.BlitSymbString(Symbol.Text(Text[Shift..end_i], (index) => 
-				Cursor - Shift - 1 == index ? new((255, 255, 255), (0, 0, 0)) : ConsoleColor.Default
+				Cursor - Shift - 1 == index && Focused ? new((255, 255, 255), (0, 0, 0)) : ConsoleColor.Default
 			), Position + new Vec2I(1,1) );
 		}
+		public bool Empty { get => Text == ""; }
 		public override void Update()
 		{
 			base.Update();

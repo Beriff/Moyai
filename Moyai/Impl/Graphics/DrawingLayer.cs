@@ -25,7 +25,7 @@ namespace Moyai.Impl.Graphics
 				List<Button> buttons = [];
 				foreach(var option in options)
 				{
-					buttons.Add(new Button("OK", new((255, 255, 255)), new((127, 127, 127)), new(4, 1))
+					buttons.Add(new Button(option, new((255, 255, 255)), new((127, 127, 127)), new(4, 1))
 					{ OnClick = (_) => dispatcher(w, option)});
 				}
 				w.LocalInput = c;
@@ -175,6 +175,127 @@ namespace Moyai.Impl.Graphics
 				}
 				populate(path);
 			});
+			return (w, c);
+		}
+
+		public (Window, InputConsumer) FileCreateDialogue(Vec2I size, string path, string ext, Action<string> callback)
+		{
+			// Create the basic window to hold the file select dialogue
+			var w = new Window("Create file", size);
+
+			// Create a new input consumer that blocks input propogation to layers below
+			var c = new InputConsumer(w.Name + "_input", InputBus.HigherPriority("UI"))
+			{ Blocking = true };
+
+
+			InputBus.AddConsumer("UI", c);
+			w.LocalInput = c;
+
+			// Create a scrolling frame with no borders to hold a list of files and dirs
+			var scroll = ScrollFrame.NoFrame(size - new Vec2I(1,3), new(1));
+			scroll.LocalInput = c;
+			w.AddChild(scroll);
+
+			// Vertical list to align items automatically
+			var list = new VerticalList(new(1), padding: 0) { LocalInput = c };
+			scroll.AddChild(list);
+
+			ActionQueue.Add(() =>
+			{
+				Drawables.Add(w);
+				var last = Drawables.Count;
+				w.OnClick = (self) =>
+				{
+					if (self.LocalInput.MousePos().Equals(
+						self.Position + new Vec2I(self.AbsoluteSize.X - 3, 0)
+						)
+					)
+					{
+						InputBus.RemoveConsumer(self.LocalInput);
+						ActionQueue.Add(() => { Drawables.RemoveAt(last - 1); });
+					}
+				};
+
+				w.AddChild(
+					new InputBox("name", size.X)
+					{
+						Position = new(0, size.Y - 3),
+						Name = "filename_input",
+						LocalInput = c
+					},
+
+					new Button($"Create {ext}", new((255, 255, 255)), new((127, 127, 127)), new(8, 1))
+					{
+						Position = size - new Vec2I(10, 1),
+						LocalInput = c,
+						OnClick = (_) =>
+						{
+							var filename_input = w.GetChild("filename_input")
+								as InputBox;
+							if (filename_input.Empty) return;
+							var filename = Path.Combine(
+								Symbol.StringFromText((list.GetChild("current_dir") as Label).Text)[1..^1], 
+								$"{filename_input.Text}.{ext}");
+							File.Create(filename).Dispose();
+							w.CloseAsDialogue(this)();
+							callback(filename);
+						}
+					}
+				);
+			});
+
+			// Current directory indicator
+			list.AddChild(new Label(Symbol.Text($"[{path}]"), w.Position + new Vec2I(1)) 
+			{ LocalInput = c, Name = "current_dir" });
+
+			// a function that highlights hovered file
+			void hovertoggle(Widget self)
+			{
+				var l = self as Label;
+				l.Text = Symbol.Text(
+					Symbol.StringFromText(l.Text),
+					(i) =>
+					{
+						// invert fg and bg
+						return new ConsoleColor((255, 255, 255)) - l.Text[i].Color;
+					}
+					);
+			}
+
+			// a function that populates the vertical list with dirs from dirname
+			void populate(string dirname)
+			{
+				list.ActionQueue.Add(() => list.AddChild(
+					new Label(
+						Symbol.Text(".."),
+						w.Position + new Vec2I(1))
+					{ LocalInput = c, OnHover = hovertoggle, OnHoverEnd = hovertoggle, OnClick = ondirclick(Path.GetFullPath(Path.Join(dirname, ".."))) }
+					));
+				foreach (var s in Directory.GetDirectories(dirname))
+				{
+					list.ActionQueue.Add(() => list.AddChild(
+					new Label(
+						Symbol.Text(new DirectoryInfo(s).Name),
+					w.Position + new Vec2I(1))
+					{ LocalInput = c, OnHover = hovertoggle, OnHoverEnd = hovertoggle, OnClick = ondirclick(Path.Join(dirname, new DirectoryInfo(s).Name)) }
+					));
+				}
+			}
+
+			Action<Widget> ondirclick(string dirname)
+			{
+
+				return (Widget self) => {
+					scroll.Scroll = 0;
+					list.ActionQueue.Add(() => list.Children.Clear());
+					list.ActionQueue.Add(() => list.AddChild(new Label(Symbol.Text($"[{dirname}]"), w.Position + new Vec2I(1)) { LocalInput = c }));
+					populate(dirname);
+
+				};
+
+			}
+
+			populate(path);
 			return (w, c);
 		}
 

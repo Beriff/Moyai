@@ -11,13 +11,10 @@ namespace Moyai.Impl.Graphics.Widgets
 		protected bool Held { get; set; }
 		public Action CloseAsDialogue(DrawingLayer dl) => () =>
 		{
+			InputBus.RemoveConsumer(LocalInput);
 			dl.ActionQueue.Add(() =>
 			{
 				dl.Drawables.Remove(this);
-			});
-			ActionQueue.Add(() =>
-			{
-				InputBus.RemoveConsumer(LocalInput);
 			});
 		};
 		public override void Draw(ConsoleBuffer buf)
@@ -56,14 +53,14 @@ namespace Moyai.Impl.Graphics.Widgets
 
 		public void PositionActionButtons(params Button[] buttons)
 		{
-			int dist = 0;
+			int dist = Position.X + AbsoluteSize.X - 1;
 			foreach(var button in buttons)
 			{
+				dist -= button.Size.X + 1;
 				AddChild(button);
 				button.LocalInput = LocalInput;
-				button.Position = new(Position.X + AbsoluteSize.X - button.Size.X - 1 - dist, 
+				button.Position = new(dist, 
 					Position.Y + AbsoluteSize.Y - 1);
-				dist = button.Position.X;
 			}
 		}
 
