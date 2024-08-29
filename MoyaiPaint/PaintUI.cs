@@ -60,6 +60,7 @@ namespace MoyaiPaint
 			{
 				Canvas canvas = new(new(0, 3), dsprite);
 				UI.ActionQueue.Add(() => _=UI + canvas);
+				(UI.Get("CanvasTabs") as TabContainer).AddTab(dsprite.name);
 			}
 				
 		}
@@ -80,13 +81,13 @@ namespace MoyaiPaint
 			_ = UI
 				+ new Rectangle(new(0), new(SIZE.X - 1, 0), new('▓', new((255, 255, 255))))
 
-				+ new TabContainer(new(0, 1), new(SIZE.X - 1, SIZE.Y - 1), ["file1"])
+				+ new TabContainer(new(0, 1), new(SIZE.X - 1, SIZE.Y - 1), [])
 				{ Name = "CanvasTabs" }
 
 				+ new HorizontalList(new(0), [
 					new ExpandingSelection(
 					Symbol.Text("File", new Moyai.Impl.ConsoleColor((255, 255, 255), (0, 0, 0))),
-					["New", "Open", "Close"], dispatch_fileMenu_event, new(0))
+					["New", "Open", "Save", "Close"], dispatch_fileMenu_event, new(0))
 				]);
 		}
 	}

@@ -69,7 +69,7 @@ namespace Moyai.Impl.Graphics
             {
                 for (int y = 0; y < Size.Y; y++)
                 {
-                    this[x, y] = new Symbol(' ', ConsoleColor.OnlyFg((0, 0, 0)));
+                    this[x, y] = new Symbol(' ', ConsoleColor.OnlyFg((0, 0, 0))) { Transparent = true };
                 }
             }
         }
@@ -90,7 +90,7 @@ namespace Moyai.Impl.Graphics
         {
             Size = size;
             Grid = new Symbol[size.X, size.Y];
-            Fill(new(' ', ConsoleColor.Default));
+            Fill(new(' ', ConsoleColor.Default) { Transparent = true });
         }
     }
 }

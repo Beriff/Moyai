@@ -8,7 +8,7 @@ namespace MoyaiPaint
 	class Canvas : Widget
 	{
 		public List<CanvasLayer> Layers { get; private set; } = [];
-		public ConsoleBuffer Viewport;
+		public ConsoleBuffer Viewport { get; set; }
 		public Vec2I Offset;
 
 		public override void Draw(ConsoleBuffer buf)
@@ -18,10 +18,25 @@ namespace MoyaiPaint
 				if(l.IsGroup)
 					l.Children.ForEach(d);
 				else
-					l.Buffer.Blit(Viewport, Offset);
+				{
+					l.Buffer.Blit(Viewport, Offset + new Vec2I(1, 1));
+				}
+					
 			}
 			Layers.ForEach(d);
-			Viewport.Blit(buf, Position);
+			
+			// emulate "transparency mask", showing transparent pixels
+			for (int x = 0; x < Viewport.Size.X; x++)
+			{
+				for(int y = 0; y < Viewport.Size.Y; y++)
+				{
+					if (Viewport[x, y].Transparent)
+						Viewport[x, y] = new('░', new((0,0,0),(127, 127, 127)));
+				}
+			}
+
+			Viewport.Blit(buf, Position + new Vec2I(1,0) );
+			Viewport.Clear();
 		}
 
 		public Canvas(Vec2I pos, Vec2I size) :
@@ -32,8 +47,7 @@ namespace MoyaiPaint
 
 		protected static CanvasLayer DeserializeLayer(Vec2I size, DeserializedLayer l)
 		{
-			var layer = new CanvasLayer(l.name, l.hidden, size);
-			layer.Children = [];
+			var layer = new CanvasLayer(l.name, l.hidden, size) { Children = [] };
 			if (l.children.Length != 0)
 			{
 				foreach(var child in l.children)

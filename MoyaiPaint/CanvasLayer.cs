@@ -11,7 +11,7 @@ namespace MoyaiPaint
 		public bool Hidden;
 		public List<CanvasLayer> Children;
 
-		public bool IsGroup {  get => Children.Count == 0; }
+		public bool IsGroup {  get => Children.Count != 0; }
 
 		public CanvasLayer(string name, bool hidden, Vec2I size)
 		{

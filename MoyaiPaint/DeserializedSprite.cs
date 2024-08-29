@@ -9,6 +9,7 @@ namespace MoyaiPaint
     class DeserializedSprite
     {
         public int[] size { get; set; }
+        public string name { get; set; }
         public DeserializedLayer[] layers { get; set; }
     }
 
