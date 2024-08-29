@@ -317,7 +317,7 @@ namespace Moyai.Impl.Graphics
 		public void Draw()
 		{
 			Buffer.Clear();
-			Drawables = Drawables.OrderByDescending((d) => d.ZLayer).ToList();
+			Drawables = [.. Drawables.OrderByDescending((d) => d.ZLayer)];
 			foreach (var d in Drawables)
 				d.Draw(Buffer);
 			Buffer.Render();
@@ -326,13 +326,18 @@ namespace Moyai.Impl.Graphics
 		public DrawingLayer(ConsoleBuffer buf)
 		{
 			Buffer = buf;
-			Drawables = new();
+			Drawables = [];
 		}
 
 		public static DrawingLayer operator +(DrawingLayer layer, IDrawable drawable)
 		{
 			layer.Drawables.Add(drawable);
 			return layer;
+		}
+
+		public Widget Get(string name) 
+		{
+			return Drawables.Find(d => d is Widget && (d as Widget).Name == name) as Widget; 
 		}
 	}
 }

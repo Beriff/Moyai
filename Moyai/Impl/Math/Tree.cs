@@ -9,16 +9,23 @@
 		public TreeNode(T value)
 		{
 			Value = value;
-			Children = new();
+			Children = [];
 		}
 
 		public static explicit operator T(TreeNode<T> node) => node.Value;
 		public static explicit operator TreeNode<T>(T v) => new(v);
 
-		public void AddChild(T child)
+		public void Traverse(Action<T> action)
+		{
+			action(Value);
+			foreach(var child in Children) child.Traverse(action);
+		}
+
+		public TreeNode<T> AddChild(T child)
 		{
 			TreeNode<T> node = new(child) { Parent = this };
 			Children.Add(node);
+			return node;
 		}
 		public void RemoveChild(TreeNode<T> child)
 		{

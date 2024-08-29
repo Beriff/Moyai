@@ -1,6 +1,8 @@
 ﻿using Moyai.Impl.Graphics;
 using Moyai.Impl.Graphics.Widgets;
 
+using System.Text.Json;
+
 namespace MoyaiPaint
 {
 	public partial class MoyaiPaint
@@ -10,6 +12,7 @@ namespace MoyaiPaint
 			void fileSelected(string filepath)
 			{
 				OpenedFile = Path.GetFileName(filepath);
+				InitializeFile(filepath);
 			}
 
 			UI.FileSelectDialogue(new(40, 20), @"C:\", fileSelected);
@@ -49,6 +52,18 @@ namespace MoyaiPaint
 
 		}
 
+		public void InitializeFile(string filepath)
+		{
+			var text = File.ReadAllText(filepath);
+			var dsprite = JsonSerializer.Deserialize<DeserializedSprite>(text);
+			if(dsprite != null)
+			{
+				Canvas canvas = new(new(0, 3), dsprite);
+				UI.ActionQueue.Add(() => _=UI + canvas);
+			}
+				
+		}
+
 		public MoyaiPaint()
 		{
 			void dispatch_fileMenu_event(string @event)
@@ -64,6 +79,9 @@ namespace MoyaiPaint
 			UI = new(Main);
 			_ = UI
 				+ new Rectangle(new(0), new(SIZE.X - 1, 0), new('▓', new((255, 255, 255))))
+
+				+ new TabContainer(new(0, 1), new(SIZE.X - 1, SIZE.Y - 1), ["file1"])
+				{ Name = "CanvasTabs" }
 
 				+ new HorizontalList(new(0), [
 					new ExpandingSelection(

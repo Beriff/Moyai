@@ -24,7 +24,7 @@ namespace Moyai.Impl.Graphics.Widgets
 			HasExpanded = false;
 		}
 		public override Vec2I Size { get => new(MainText.Length, 1); set { } }
-		public override Rect Bounds => new(Position, Position + new Vec2I(MainText.Length, 1));
+		public override Rect Bounds => new(Position, Position + new Vec2I(MainText.Length, 0));
 		public override void Update()
 		{
 			base.Update();

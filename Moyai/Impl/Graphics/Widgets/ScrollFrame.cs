@@ -12,12 +12,12 @@ namespace Moyai.Impl.Graphics.Widgets
 			OnClick = (w) => 
 			{ 
 				Focused = !Focused;
-				if (Focused)
+				if (Focused && Label.Length > 0)
 				{
 					var str = Symbol.StringFromText(Label);
 					str = "[" + str + "]";
 					Label = Symbol.Text(str);
-				} else
+				} else if (Label.Length > 0)
 				{
 					var str = Symbol.StringFromText(Label)[1..^1];
 					Label = Symbol.Text(str);
